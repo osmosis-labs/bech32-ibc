@@ -1,11 +1,11 @@
 syntax = "proto3";
-package cosmos.bech32ibc.v1beta1;
+package osmosis.bech32ibc.v1beta1;
 
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/duration.proto";
 
-import "cosmos/bech32ibc/v1beta1/types.proto";
+import "osmosis/bech32ibc/v1beta1/types.proto";
 
 option go_package = "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types";
 
