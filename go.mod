@@ -3,8 +3,8 @@ module github.com/osmosis-labs/bech32-ibc
 go 1.15
 
 require (
-	github.com/armon/go-metrics v0.3.8 // indirect
-	github.com/cosmos/cosmos-sdk v0.43.0
+	github.com/armon/go-metrics v0.3.8
+	github.com/cosmos/cosmos-sdk v0.42.9
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/protobuf v1.5.2
 	github.com/gorilla/mux v1.8.0
@@ -23,5 +23,3 @@ require (
 replace google.golang.org/grpc => google.golang.org/grpc v1.33.2
 
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alpha.regen.4
-
-replace github.com/cosmos/cosmos-sdk => github.com/osmosis-labs/cosmos-sdk v0.42.10-0.20210819201800-7d5063b74305
