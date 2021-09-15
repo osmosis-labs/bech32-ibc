@@ -418,7 +418,6 @@ func New(
 		ibctransfertypes.ModuleName,
 		bech32ibctypes.ModuleName,
 		bech32ics20types.ModuleName,
-		bech32ibctypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	)
 
