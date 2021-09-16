@@ -142,6 +142,16 @@ proto:
 	@echo "=========== Generate Complete ============"
 	@echo
 
+
+relay-test:
+	@TEST_DEBUG=true go test -mod=readonly -v ./test/...
+
+relay-test-gaia:
+	@TEST_DEBUG=true go test -mod=readonly -v ./test/... -run TestGaia*
+
+relay-test-akash:
+	@TEST_DEBUG=true go test -mod=readonly -v ./test/... -run TestAkash*
+
 test:
 	@go test -v ./x/...
 
@@ -197,8 +207,6 @@ sync-docs:
 ###############################################################################
 ###                           Tests & Simulation                            ###
 ###############################################################################
-
-include sims.mk
 
 test: test-unit test-build
 
