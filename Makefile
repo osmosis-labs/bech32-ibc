@@ -9,6 +9,10 @@ DOCKER := $(shell which docker)
 BUILDDIR ?= $(CURDIR)/build
 TEST_DOCKER_REPO=osmosis-labs/bech32ibcdnode
 
+GAIA_VERSION := v5.0.4
+AKASH_VERSION := v0.12.1
+WASMD_VERSION := v0.16.0
+
 export GO111MODULE = on
 
 # process build tags
@@ -142,6 +146,11 @@ proto:
 	@echo "=========== Generate Complete ============"
 	@echo
 
+build-gaia-docker:
+	docker build -t cosmos/gaia:$(GAIA_VERSION) --build-arg VERSION=$(GAIA_VERSION) -f ./docker/gaiad/Dockerfile .
+
+build-akash-docker:
+	docker build -t ovrclk/akash:$(AKASH_VERSION) --build-arg VERSION=$(AKASH_VERSION) -f ./docker/akash/Dockerfile .
 
 relay-test:
 	@TEST_DEBUG=true go test -mod=readonly -v ./test/...
