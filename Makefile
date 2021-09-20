@@ -11,6 +11,7 @@ TEST_DOCKER_REPO=osmosis-labs/bech32ibcdnode
 
 GAIA_VERSION := v5.0.4
 AKASH_VERSION := v0.12.1
+BECH32IBC_VERSION := bdb61eeaac678c9c6196d2980e87b6f16b7d55af
 WASMD_VERSION := v0.16.0
 
 export GO111MODULE = on
@@ -152,6 +153,9 @@ build-gaia-docker:
 build-akash-docker:
 	docker build -t ovrclk/akash:$(AKASH_VERSION) --build-arg VERSION=$(AKASH_VERSION) -f ./docker/akash/Dockerfile .
 
+build-bech32ibc-docker:
+	docker build -t osmosis-labs/bech32ibc:$(BECH32IBC_VERSION) --build-arg VERSION=$(BECH32IBC_VERSION) -f ./docker/bech32ibc/Dockerfile .
+
 relay-test:
 	@TEST_DEBUG=true go test -mod=readonly -v ./test/...
 
@@ -160,6 +164,9 @@ relay-test-gaia:
 
 relay-test-akash:
 	@TEST_DEBUG=true go test -mod=readonly -v ./test/... -run TestAkash*
+
+relay-test-bech32ibc:
+	@TEST_DEBUG=true go test -mod=readonly -v ./test/... -run TestBech32IBC*
 
 test:
 	@go test -v ./x/...
