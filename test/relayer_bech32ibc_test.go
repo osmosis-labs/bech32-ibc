@@ -4,7 +4,9 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/cosmos/relayer/relayer"
+	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,11 +21,12 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 	chains := spinUpTestChains(t, bech32ibcChains...)
 
 	var (
-		src         = chains.MustGet("ibc-0")
-		dst         = chains.MustGet("ibc-1")
-		testDenom   = "samoleans"
-		testCoin    = sdk.NewCoin(testDenom, sdk.NewInt(1000))
-		twoTestCoin = sdk.NewCoin(testDenom, sdk.NewInt(2000))
+		src            = chains.MustGet("ibc-0")
+		dst            = chains.MustGet("ibc-1")
+		testDenom      = "samoleans"
+		testCoin       = sdk.NewCoin(testDenom, sdk.NewInt(1000))
+		twoTestCoin    = sdk.NewCoin(testDenom, sdk.NewInt(2000))
+		initialDeposit = sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(20000000))
 	)
 
 	path, err := genTestPathAndSet(src, dst, "transfer", "transfer")
@@ -55,6 +58,38 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 	// send a couple of transfers to the queue on dst
 	require.NoError(t, dst.SendTransferMsg(src, testCoin, src.MustGetAddress().String(), 0, 0))
 	require.NoError(t, dst.SendTransferMsg(src, testCoin, src.MustGetAddress().String(), 0, 0))
+
+	// Native HRP is set to "stake" as part of genesis in `bech32ibc-setup.sh`
+	// Send a proposal to connect hrp with channel
+	msg, err := govtypes.NewMsgSubmitProposal(
+		&bech32ibctypes.UpdateHrpIbcChannelProposal{
+			Title:         "set hrp for gaia network",
+			Description:   "set hrp for gaia network",
+			Hrp:           gaiaTestConfig.accountPrefix,
+			SourceChannel: dst.PathEnd.ChannelID, // TODO: is this correct?
+		},
+		sdk.Coins{initialDeposit},
+		dst.MustGetAddress(),
+	)
+	require.NoError(t, err)
+	_, _, err = dst.SendMsg(msg)
+	require.NoError(t, err)
+
+	// approve the proposal
+	// TODO: proposal_id should be fetched from above message response
+	_, _, err = dst.SendMsg(govtypes.NewMsgVote(dst.MustGetAddress(), 1, govtypes.OptionYes))
+	require.NoError(t, dst.WaitForNBlocks(1))
+
+	// wait for voting period
+	dst.WaitForNBlocks(5)
+
+	// TODO: check hrp is updated correctly
+
+	// TODO: Broadcast `MsgSend` target address set to native chain address via bech32ics20
+	// check balance changes
+
+	// TODO: Broadcast `MsgSend` target address set to gaia address via bech32ics20
+	// check balance changes
 
 	// Wait for message inclusion in both chains
 	require.NoError(t, dst.WaitForNBlocks(1))
