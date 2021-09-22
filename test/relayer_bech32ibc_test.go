@@ -91,6 +91,8 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 	// TODO: Broadcast `MsgSend` target address set to gaia address via bech32ics20
 	// check balance changes
 
+	// TODO: rebuild bech32ibc docker to use different genesis values to make the test pass
+
 	// Wait for message inclusion in both chains
 	require.NoError(t, dst.WaitForNBlocks(1))
 
