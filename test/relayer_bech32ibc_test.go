@@ -11,7 +11,7 @@ import (
 var (
 	bech32ibcChains = []testChain{
 		{"ibc-0", 0, gaiaTestConfig},
-		{"ibc-1", 1, akashTestConfig},
+		{"ibc-1", 1, bech32ibcTestConfig},
 	}
 )
 

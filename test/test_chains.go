@@ -47,6 +47,14 @@ var (
 		trustingPeriod: "330h",
 	}
 
+	bech32ibcTestConfig = testChainConfig{
+		dockerfile:     "./setup/Dockerfile.bech32ibctest",
+		timeout:        3 * time.Second,
+		rpcPort:        "26657",
+		accountPrefix:  "osmo",
+		trustingPeriod: "330h",
+	}
+
 	seeds = []string{SEED1, SEED2}
 )
 
