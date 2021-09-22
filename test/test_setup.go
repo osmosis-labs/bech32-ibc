@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"strconv"
 	"strings"
 	"sync"
@@ -156,14 +155,7 @@ func spinUpTestContainer(t *testing.T, rchan chan<- *dockertest.Resource,
 	require.NoError(t, removeTestContainer(pool, containerName))
 
 	// create the proper docker image with port forwarding setup
-	d, err := os.Getwd()
-	require.NoError(t, err)
-
-	buildOpts := &dockertest.BuildOptions{
-		Dockerfile: tc.t.dockerfile,
-		ContextDir: path.Dir(d),
-	}
-	resource, err = pool.BuildAndRunWithBuildOptions(buildOpts, dockerOpts)
+	resource, err = pool.BuildAndRunWithOptions(tc.t.dockerfile, dockerOpts)
 	require.NoError(t, err)
 
 	c.Log(fmt.Sprintf("- [%s] SPUN UP IN CONTAINER %s from %s", c.ChainID,
@@ -175,6 +167,9 @@ func spinUpTestContainer(t *testing.T, rchan chan<- *dockertest.Resource,
 	}
 
 	c.Log(fmt.Sprintf("- [%s] CONTAINER AVAILABLE AT PORT %s", c.ChainID, c.RPCAddr))
+
+	// initialize the light client
+	require.NoError(t, c.ForceInitLight())
 
 	rchan <- resource
 }
@@ -216,11 +211,11 @@ func getLoggingChain(chns []*ry.Chain, rsr *dockertest.Resource) *ry.Chain {
 }
 
 func genTestPathAndSet(src, dst *ry.Chain, srcPort, dstPort string) (*ry.Path, error) {
-	p := ry.GenPath(src.ChainID, dst.ChainID, srcPort, dstPort, "UNORDERED", "ics20-1")
+	path := ry.GenPath(src.ChainID, dst.ChainID, srcPort, dstPort, "UNORDERED", "ics20-1")
 
-	src.PathEnd = p.Src
-	dst.PathEnd = p.Dst
-	return p, nil
+	src.PathEnd = path.Src
+	dst.PathEnd = path.Dst
+	return path, nil
 }
 
 func genPrivValKeyJSON(seedNumber int) {

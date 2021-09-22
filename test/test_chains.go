@@ -27,7 +27,7 @@ var (
 	// timeout_propose = "1000ms"
 	// 3 second relayer timeout works well with these block times
 	gaiaTestConfig = testChainConfig{
-		dockerfile:     "docker/gaiad/Dockerfile",
+		dockerfile:     "./setup/Dockerfile.gaiatest",
 		timeout:        3 * time.Second,
 		rpcPort:        "26657",
 		accountPrefix:  "cosmos",
@@ -40,7 +40,7 @@ var (
 	// 3 second relayer timeout works well with these block times
 	// This is built from contrib/Dockerfile.test from the akash repository:
 	akashTestConfig = testChainConfig{
-		dockerfile:     "docker/akash/Dockerfile",
+		dockerfile:     "./setup/Dockerfile.akashtest",
 		timeout:        3 * time.Second,
 		rpcPort:        "26657",
 		accountPrefix:  "akash",

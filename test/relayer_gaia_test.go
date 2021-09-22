@@ -157,20 +157,6 @@ func TestGaiaReuseIdentifiers(t *testing.T) {
 
 	require.Equal(t, expectedSrc, src)
 	require.Equal(t, expectedDst, dst)
-
-	expectedSrcClient := src.PathEnd.ClientID
-	expectedDstClient := dst.PathEnd.ClientID
-
-	// test client creation with override
-	src.PathEnd.ClientID = ""
-	dst.PathEnd.ClientID = ""
-
-	_, err = src.CreateClients(dst)
-	require.NoError(t, err)
-	testClientPair(t, src, dst)
-
-	require.NotEqual(t, expectedSrcClient, src.PathEnd.ClientID)
-	require.NotEqual(t, expectedDstClient, dst.PathEnd.ClientID)
 }
 
 func TestGaiaMisbehaviourMonitoring(t *testing.T) {
@@ -211,10 +197,18 @@ func TestGaiaMisbehaviourMonitoring(t *testing.T) {
 	header, err := dst.QueryHeaderAtHeight(latestHeight)
 	require.NoError(t, err)
 
-	clientState, err := src.QueryClientState(latestHeight)
+	clientStateRes, err := src.QueryClientState(latestHeight)
 	require.NoError(t, err)
 
-	height := clientState.GetProofHeight()
+	// unpack any into ibc tendermint client state
+	clientStateExported, err := clienttypes.UnpackClientState(clientStateRes.ClientState)
+	require.NoError(t, err)
+
+	// cast from interface to concrete type
+	clientState, ok := clientStateExported.(*ibctmtypes.ClientState)
+	require.True(t, ok, "error when casting exported clientstate")
+
+	height := clientState.GetLatestHeight().(clienttypes.Height)
 	heightPlus1 := clienttypes.NewHeight(height.RevisionNumber, height.RevisionHeight+1)
 
 	// setup validator for signing duplicate header
@@ -248,11 +242,19 @@ func TestGaiaMisbehaviourMonitoring(t *testing.T) {
 	// kill relayer routine
 	rlyDone()
 
-	clientState, err = src.QueryClientState(0)
+	clientStateRes, err = src.QueryClientState(0)
 	require.NoError(t, err)
 
-	// clientstate should be frozen i.e., clientstate frozenheight should not be zero
-	require.False(t, clientState.ProofHeight.IsZero())
+	// unpack any into ibc tendermint client state
+	clientStateExported, err = clienttypes.UnpackClientState(clientStateRes.ClientState)
+	require.NoError(t, err)
+
+	// cast from interface to concrete type
+	clientState, ok = clientStateExported.(*ibctmtypes.ClientState)
+	require.True(t, ok, "error when casting exported clientstate")
+
+	// clientstate should be frozen
+	require.True(t, clientState.IsFrozen())
 }
 
 func createTMClientHeader(t *testing.T, chainID string, blockHeight int64, trustedHeight clienttypes.Height,
