@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/cosmos/relayer/relayer"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
@@ -78,7 +79,7 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 	// approve the proposal
 	// TODO: proposal_id should be fetched from above message response
 	_, _, err = dst.SendMsg(govtypes.NewMsgVote(dst.MustGetAddress(), 1, govtypes.OptionYes))
-	require.NoError(t, dst.WaitForNBlocks(1))
+	require.NoError(t, err)
 
 	// wait for voting period
 	dst.WaitForNBlocks(5)
@@ -87,9 +88,17 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 
 	// TODO: Broadcast `MsgSend` target address set to native chain address via bech32ics20
 	// check balance changes
+	_, _, err = dst.SendMsg(banktypes.NewMsgSend(dst.MustGetAddress(), dst.MustGetAddress(), sdk.Coins{testCoin}))
+	require.NoError(t, err)
 
 	// TODO: Broadcast `MsgSend` target address set to gaia address via bech32ics20
 	// check balance changes
+	_, _, err = dst.SendMsg(&banktypes.MsgSend{
+		FromAddress: dst.MustGetAddress().String(),
+		ToAddress:   src.MustGetAddress().String(),
+		Amount:      sdk.Coins{testCoin},
+	})
+	require.NoError(t, err)
 
 	// TODO: rebuild bech32ibc docker to use different genesis values to make the test pass
 
