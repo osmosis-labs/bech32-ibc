@@ -36,5 +36,7 @@ RUN chmod -R 777 ./setup
 
 EXPOSE 26657
 
+RUN chmod +x ./bech32ibc-setup.sh
+
 ENTRYPOINT [ "./bech32ibc-setup.sh" ]
 # NOTE: to run this image, docker run -d -p 26657:26657 ./bech32ibc-setup.sh {{chain_id}} {{genesis_account}} {{seeds}} {{priv_validator_key_path}}
