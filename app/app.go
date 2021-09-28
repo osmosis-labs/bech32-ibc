@@ -162,6 +162,8 @@ func init() {
 		panic(err)
 	}
 
+	appparams.SetAddressPrefixes()
+
 	DefaultNodeHome = filepath.Join(userHomeDir, "."+Name)
 }
 
