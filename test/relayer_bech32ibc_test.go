@@ -1,6 +1,8 @@
 package test
 
 import (
+	"context"
+	"fmt"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -17,6 +19,22 @@ var (
 		{"ibc-1", 1, bech32ibcTestConfig},
 	}
 )
+
+// QueryHrpIbcRecords queries hrp ibc records
+func QueryHrpIbcRecords(c *relayer.Chain) ([]bech32ibctypes.HrpIbcRecord, error) {
+	done := c.UseSDKContext()
+	done()
+
+	params := &bech32ibctypes.QueryHrpIbcRecordsRequest{}
+	queryClient := bech32ibctypes.NewQueryClient(c.CLIContext(0))
+
+	res, err := queryClient.HrpIbcRecords(context.Background(), params)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.HrpIbcRecords, nil
+}
 
 func TestBech32IBCStreamingRelayer(t *testing.T) {
 	chains := spinUpTestChains(t, bech32ibcChains...)
@@ -73,18 +91,26 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 		dst.MustGetAddress(),
 	)
 	require.NoError(t, err)
-	_, _, err = dst.SendMsg(msg)
+	resp, _, err := dst.SendMsg(msg)
 	require.NoError(t, err)
+
+	dst.Log(fmt.Sprintln("MsgSubmitProposal.Response", resp.Logs))
 
 	// approve the proposal
 	// TODO: proposal_id should be fetched from above message response
-	_, _, err = dst.SendMsg(govtypes.NewMsgVote(dst.MustGetAddress(), 1, govtypes.OptionYes))
+	resp, _, err = dst.SendMsg(govtypes.NewMsgVote(dst.MustGetAddress(), 1, govtypes.OptionYes))
 	require.NoError(t, err)
+
+	dst.Log(fmt.Sprintln("MsgVote.Response", resp.Logs))
 
 	// wait for voting period
 	dst.WaitForNBlocks(5)
 
 	// TODO: check hrp is updated correctly
+	hrpRecords, err := QueryHrpIbcRecords(dst)
+	require.NoError(t, err)
+
+	dst.Log(fmt.Sprintln("hrpRecords.Response", hrpRecords))
 
 	// TODO: Broadcast `MsgSend` target address set to native chain address via bech32ics20
 	// check balance changes
@@ -99,8 +125,6 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 		Amount:      sdk.Coins{testCoin},
 	})
 	require.NoError(t, err)
-
-	// TODO: rebuild bech32ibc docker to use different genesis values to make the test pass
 
 	// Wait for message inclusion in both chains
 	require.NoError(t, dst.WaitForNBlocks(1))
