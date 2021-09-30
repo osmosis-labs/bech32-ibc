@@ -6,10 +6,10 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/cosmos/relayer/relayer"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
+	bech32ics20types "github.com/osmosis-labs/bech32-ibc/x/bech32ics20/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -104,7 +104,9 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 	dst.Log(fmt.Sprintln("MsgVote.Response", resp.Logs))
 
 	// wait for voting period
-	dst.WaitForNBlocks(5)
+	dst.WaitForNBlocks(50)
+
+	dst.Log(fmt.Sprintln("Log after 50 blocks"))
 
 	// TODO: check hrp is updated correctly
 	hrpRecords, err := QueryHrpIbcRecords(dst)
@@ -114,12 +116,16 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 
 	// TODO: Broadcast `MsgSend` target address set to native chain address via bech32ics20
 	// check balance changes
-	_, _, err = dst.SendMsg(banktypes.NewMsgSend(dst.MustGetAddress(), dst.MustGetAddress(), sdk.Coins{testCoin}))
+	_, _, err = dst.SendMsg(&bech32ics20types.MsgSend{
+		FromAddress: dst.MustGetAddress().String(),
+		ToAddress:   dst.MustGetAddress().String(),
+		Amount:      sdk.Coins{testCoin},
+	})
 	require.NoError(t, err)
 
 	// TODO: Broadcast `MsgSend` target address set to gaia address via bech32ics20
 	// check balance changes
-	_, _, err = dst.SendMsg(&banktypes.MsgSend{
+	_, _, err = dst.SendMsg(&bech32ics20types.MsgSend{
 		FromAddress: dst.MustGetAddress().String(),
 		ToAddress:   src.MustGetAddress().String(),
 		Amount:      sdk.Coins{testCoin},
