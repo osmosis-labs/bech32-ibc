@@ -28,13 +28,15 @@ func NewKeeper(
 	bk bankkeeper.Keeper,
 	tk types.TransferKeeper,
 	hrpToChannelMapper types.Bech32HrpToSourceChannelMap,
+	ics20TransferMsgServer types.ICS20TransferMsgServer,
 	cdc codec.Marshaler,
 ) *Keeper {
 	return &Keeper{
-		bk:                 bk,
-		tk:                 tk,
-		hrpToChannelMapper: hrpToChannelMapper,
-		cdc:                cdc,
+		bk:                     bk,
+		tk:                     tk,
+		hrpToChannelMapper:     hrpToChannelMapper,
+		ics20TransferMsgServer: ics20TransferMsgServer,
+		cdc:                    cdc,
 	}
 }
 

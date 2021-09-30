@@ -318,7 +318,9 @@ func New(
 
 	app.Bech32ICS20Keeper = *bech32ics20keeper.NewKeeper(
 		app.BankKeeper, app.TransferKeeper,
-		app.Bech32IBCKeeper, appCodec,
+		app.Bech32IBCKeeper,
+		app.TransferKeeper,
+		appCodec,
 	)
 
 	// Create evidence Keeper for to register the IBC light client misbehaviour evidence route
