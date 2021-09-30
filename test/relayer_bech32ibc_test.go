@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -34,6 +35,22 @@ func QueryHrpIbcRecords(c *relayer.Chain) ([]bech32ibctypes.HrpIbcRecord, error)
 	}
 
 	return res.HrpIbcRecords, nil
+}
+
+// QueryProposals query proposals
+func QueryProposals(c *relayer.Chain) ([]govtypes.Proposal, error) {
+	done := c.UseSDKContext()
+	done()
+
+	params := &govtypes.QueryProposalsRequest{}
+	queryClient := govtypes.NewQueryClient(c.CLIContext(0))
+
+	res, err := queryClient.Proposals(context.Background(), params)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Proposals, nil
 }
 
 func TestBech32IBCStreamingRelayer(t *testing.T) {
@@ -96,17 +113,25 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 
 	dst.Log(fmt.Sprintln("MsgSubmitProposal.Response", resp.Logs))
 
+	proposalIDStr := resp.Logs[0].Events[2].Attributes[0].Value
+	dst.Log(fmt.Sprintln("ProposalIDStr", proposalIDStr))
+	proposalID, err := strconv.Atoi(proposalIDStr)
+	require.NoError(t, err)
+
 	// approve the proposal
-	// TODO: proposal_id should be fetched from above message response
-	resp, _, err = dst.SendMsg(govtypes.NewMsgVote(dst.MustGetAddress(), 1, govtypes.OptionYes))
+	resp, _, err = dst.SendMsg(govtypes.NewMsgVote(dst.MustGetAddress(), uint64(proposalID), govtypes.OptionYes))
 	require.NoError(t, err)
 
 	dst.Log(fmt.Sprintln("MsgVote.Response", resp.Logs))
 
 	// wait for voting period
-	dst.WaitForNBlocks(50)
+	dst.WaitForNBlocks(20)
 
-	dst.Log(fmt.Sprintln("Log after 50 blocks"))
+	dst.Log(fmt.Sprintln("Log after 20 blocks"))
+
+	proposals, err := QueryProposals(dst)
+	require.NoError(t, err)
+	dst.Log(fmt.Sprintln("proposals.Response", proposals))
 
 	// TODO: check hrp is updated correctly
 	hrpRecords, err := QueryHrpIbcRecords(dst)
