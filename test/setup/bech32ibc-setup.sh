@@ -29,7 +29,6 @@ bech32ibcd add-genesis-account $(bech32ibcd keys show validator -a --keyring-bac
 bech32ibcd add-genesis-account $GENACCT $coins
 cp $PRIVPATH ~/.bech32ibc/config/priv_validator_key.json
 bech32ibcd gentx validator 5000000000stake --keyring-backend="test" --chain-id $CHAINID
-bech32ibcd gentx validator 3000000000stake --keyring-backend="test" --chain-id $CHAINID
 bech32ibcd collect-gentxs
 
 # modify genesis of bech32ibc module

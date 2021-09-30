@@ -8,6 +8,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/cosmos/relayer/relayer"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 	bech32ics20types "github.com/osmosis-labs/bech32-ibc/x/bech32ics20/types"
@@ -53,6 +54,21 @@ func QueryProposals(c *relayer.Chain) ([]govtypes.Proposal, error) {
 	return res.Proposals, nil
 }
 
+func QueryValidators(c *relayer.Chain) ([]stakingtypes.Validator, error) {
+	done := c.UseSDKContext()
+	done()
+
+	params := &stakingtypes.QueryValidatorsRequest{}
+	queryClient := stakingtypes.NewQueryClient(c.CLIContext(0))
+
+	res, err := queryClient.Validators(context.Background(), params)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Validators, nil
+}
+
 func TestBech32IBCStreamingRelayer(t *testing.T) {
 	chains := spinUpTestChains(t, bech32ibcChains...)
 
@@ -63,6 +79,7 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 		testCoin       = sdk.NewCoin(testDenom, sdk.NewInt(1000))
 		twoTestCoin    = sdk.NewCoin(testDenom, sdk.NewInt(2000))
 		initialDeposit = sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(20000000))
+		delegationAmt  = sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(3000000000))
 	)
 
 	path, err := genTestPathAndSet(src, dst, "transfer", "transfer")
@@ -95,6 +112,14 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 	require.NoError(t, dst.SendTransferMsg(src, testCoin, src.MustGetAddress().String(), 0, 0))
 	require.NoError(t, dst.SendTransferMsg(src, testCoin, src.MustGetAddress().String(), 0, 0))
 
+	validators, err := QueryValidators(dst)
+	require.NoError(t, err)
+	require.GreaterOrEqual(t, len(validators), 1)
+
+	resp, _, err := dst.SendMsg(stakingtypes.NewMsgDelegate(dst.MustGetAddress(), validators[0].GetOperator(), delegationAmt))
+	require.NoError(t, err)
+	dst.Log(fmt.Sprintln("MsgDelegate.Response", resp.Logs))
+
 	// Native HRP is set to "stake" as part of genesis in `bech32ibc-setup.sh`
 	// Send a proposal to connect hrp with channel
 	msg, err := govtypes.NewMsgSubmitProposal(
@@ -108,7 +133,7 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 		dst.MustGetAddress(),
 	)
 	require.NoError(t, err)
-	resp, _, err := dst.SendMsg(msg)
+	resp, _, err = dst.SendMsg(msg)
 	require.NoError(t, err)
 
 	dst.Log(fmt.Sprintln("MsgSubmitProposal.Response", resp.Logs))
