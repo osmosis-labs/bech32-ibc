@@ -9,10 +9,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/bech32"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/cosmos/cosmos-sdk/x/bank/types"
-
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	ibctransfertypes "github.com/cosmos/cosmos-sdk/x/ibc/applications/transfer/types"
 	clienttypes "github.com/cosmos/cosmos-sdk/x/ibc/core/02-client/types"
+	"github.com/osmosis-labs/bech32-ibc/x/bech32ics20/types"
 )
 
 type msgServer struct {
@@ -80,7 +80,7 @@ func (k msgServer) Send(goCtx context.Context, msg *types.MsgSend) (*types.MsgSe
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
 				sdk.EventTypeMessage,
-				sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+				sdk.NewAttribute(sdk.AttributeKeyModule, banktypes.AttributeValueCategory),
 			),
 		)
 
@@ -93,7 +93,7 @@ func (k msgServer) Send(goCtx context.Context, msg *types.MsgSend) (*types.MsgSe
 	}
 
 	if msg.Amount.Len() == 0 {
-		return nil, sdkerrors.Wrap(types.ErrNoInputs, "invalid send amount")
+		return nil, sdkerrors.Wrap(banktypes.ErrNoInputs, "invalid send amount")
 	}
 	if msg.Amount.Len() > 1 {
 		return nil, sdkerrors.Wrap(ibctransfertypes.ErrInvalidAmount, "cannot send multiple denoms via IBC")
@@ -141,7 +141,7 @@ func (k msgServer) MultiSend(goCtx context.Context, msg *types.MsgMultiSend) (*t
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeyModule, banktypes.AttributeValueCategory),
 		),
 	)
 

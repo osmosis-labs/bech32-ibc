@@ -383,8 +383,7 @@ func New(
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
 		bech32ibc.NewAppModule(appCodec, app.Bech32IBCKeeper),
-		bech32ics20.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper),
-		// this line is used by starport scaffolding # stargate/app/appModule
+		bech32ics20.NewAppModule(appCodec, app.Bech32ICS20Keeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
