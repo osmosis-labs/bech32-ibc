@@ -39,7 +39,7 @@ func (k msgServer) Send(goCtx context.Context, msg *types.MsgSend) (*types.MsgSe
 		return nil, err
 	}
 
-	prefix, _, err := bech32.DecodeAndConvert(msg.FromAddress)
+	prefix, _, err := bech32.DecodeAndConvert(msg.ToAddress)
 	if err != nil {
 		return nil, err
 	}

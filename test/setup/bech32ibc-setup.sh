@@ -32,7 +32,7 @@ bech32ibcd gentx validator 5000000000stake --keyring-backend="test" --chain-id $
 bech32ibcd collect-gentxs
 
 # modify genesis of bech32ibc module
-sed -i 's#"nativeHRP": "osmo"#"nativeHRP": "stake"#g' ~/.bech32ibc/config/genesis.json
+# sed -i 's#"nativeHRP": "osmo"#"nativeHRP": "akash"#g' ~/.bech32ibc/config/genesis.json
 
 # modify genesis of governance voting period to be faster (20s)
 sed -i 's#"voting_period": "172800s"#"voting_period": "20s"#g' ~/.bech32ibc/config/genesis.json

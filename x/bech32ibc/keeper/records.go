@@ -80,7 +80,7 @@ func (k Keeper) GetHrpIbcRecord(ctx sdk.Context, hrp string) (types.HrpIbcRecord
 	store := ctx.KVStore(k.storeKey)
 	prefixStore := prefix.NewStore(store, types.HrpIBCRecordStorePrefix)
 	if !prefixStore.Has([]byte(hrp)) {
-		return types.HrpIbcRecord{}, types.ErrRecordNotFound
+		return types.HrpIbcRecord{}, sdkerrors.Wrap(types.ErrRecordNotFound, fmt.Sprintf("hrp record not found for %s", hrp))
 	}
 	bz := prefixStore.Get([]byte(hrp))
 
