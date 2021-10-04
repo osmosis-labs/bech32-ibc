@@ -14,6 +14,7 @@ import (
 
 type (
 	Keeper struct {
+		channelKeeper          types.ChannelKeeper
 		bk                     bankkeeper.Keeper
 		tk                     types.TransferKeeper
 		hrpToChannelMapper     types.Bech32HrpToSourceChannelMap
@@ -25,6 +26,7 @@ type (
 )
 
 func NewKeeper(
+	channelKeeper types.ChannelKeeper,
 	bk bankkeeper.Keeper,
 	tk types.TransferKeeper,
 	hrpToChannelMapper types.Bech32HrpToSourceChannelMap,
@@ -32,6 +34,7 @@ func NewKeeper(
 	cdc codec.Marshaler,
 ) *Keeper {
 	return &Keeper{
+		channelKeeper:          channelKeeper,
 		bk:                     bk,
 		tk:                     tk,
 		hrpToChannelMapper:     hrpToChannelMapper,

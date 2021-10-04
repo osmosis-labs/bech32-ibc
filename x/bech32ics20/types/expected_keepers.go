@@ -5,6 +5,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	transfertypes "github.com/cosmos/cosmos-sdk/x/ibc/applications/transfer/types"
+	channeltypes "github.com/cosmos/cosmos-sdk/x/ibc/core/04-channel/types"
+	"github.com/cosmos/cosmos-sdk/x/ibc/core/exported"
 )
 
 // Bech32HrpToSourceChannelMap defines the contract that must be fulfilled by a bech32 prefix to source
@@ -23,4 +25,10 @@ type ICS20TransferMsgServer interface {
 type TransferKeeper interface {
 	// GetPort returns the portID for the transfer module. Used in ExportGenesis
 	GetPort(ctx sdk.Context) string
+}
+
+// ChannelKeeper defines the expected IBC channel keeper
+type ChannelKeeper interface {
+	GetChannel(ctx sdk.Context, srcPort, srcChan string) (_ channeltypes.Channel, found bool)
+	GetChannelClientState(ctx sdk.Context, portID, channelID string) (string, exported.ClientState, error)
 }

@@ -99,13 +99,22 @@ func (k msgServer) Send(goCtx context.Context, msg *types.MsgSend) (*types.MsgSe
 		return nil, sdkerrors.Wrap(ibctransfertypes.ErrInvalidAmount, "cannot send multiple denoms via IBC")
 	}
 
+	portId := k.tk.GetPort(ctx)
+	_, clientState, err := k.channelKeeper.GetChannelClientState(ctx, portId, sourceChannel)
+	if err != nil {
+		return nil, err
+	}
+
+	latestHeight := clientState.GetLatestHeight()
+	timeoutHeight := clienttypes.NewHeight(latestHeight.GetRevisionNumber(), latestHeight.GetRevisionHeight()+1000)
+
 	ibcTransferMsg := ibctransfertypes.NewMsgTransfer(
-		k.tk.GetPort(ctx),
+		portId,
 		sourceChannel,
 		msg.Amount[0],
 		from,
 		msg.ToAddress,
-		clienttypes.ZeroHeight(), 0, // Use no timeouts for now.  Can add this in future.
+		timeoutHeight, 0, // Use no timeouts for now.  Can add this in future.
 	)
 
 	_, err = k.ics20TransferMsgServer.Transfer(sdk.WrapSDKContext(ctx), ibcTransferMsg)

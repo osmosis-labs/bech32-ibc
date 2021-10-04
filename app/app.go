@@ -317,6 +317,7 @@ func New(
 	)
 
 	app.Bech32ICS20Keeper = *bech32ics20keeper.NewKeeper(
+		app.IBCKeeper.ChannelKeeper,
 		app.BankKeeper, app.TransferKeeper,
 		app.Bech32IBCKeeper,
 		app.TransferKeeper,
