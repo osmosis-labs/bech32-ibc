@@ -211,7 +211,7 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 	// check balance on dst against expected
 	dstGot, err := dst.QueryBalance(dst.Key)
 	require.NoError(t, err)
-	require.Equal(t, dstExpected.AmountOf(testDenom).Int64()-4000, dstGot.AmountOf(testDenom).Int64())
+	require.Equal(t, dstExpected.AmountOf(testDenom).Int64()-5000, dstGot.AmountOf(testDenom).Int64())
 
 	// check balance on src against expected
 	srcGot, err = src.QueryBalance(src.Key)
@@ -221,5 +221,5 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 	// check balance on dst against expected
 	dstGot, err = dst.QueryBalance(dst.Key)
 	require.NoError(t, err)
-	require.Equal(t, dstExpected.AmountOf(testDenom).Int64()-4000, dstGot.AmountOf(testDenom).Int64())
+	require.Equal(t, dstExpected.AmountOf(testDenom).Int64()-5000, dstGot.AmountOf(testDenom).Int64())
 }
