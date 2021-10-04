@@ -20,3 +20,8 @@ const (
 func KeyPrefix(p string) []byte {
 	return []byte(p)
 }
+
+var (
+	NativeHrpKey            = KeyPrefix("native_hrp")
+	HrpIBCRecordStorePrefix = KeyPrefix("hrp_ibc_record")
+)

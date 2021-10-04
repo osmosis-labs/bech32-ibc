@@ -9,6 +9,11 @@ DOCKER := $(shell which docker)
 BUILDDIR ?= $(CURDIR)/build
 TEST_DOCKER_REPO=osmosis-labs/bech32ibcdnode
 
+GAIA_VERSION := v5.0.4
+AKASH_VERSION := v0.12.1
+BECH32IBC_VERSION := 83605be3ec657fe1690e6c63099dab55898e59a5
+WASMD_VERSION := v0.16.0
+
 export GO111MODULE = on
 
 # process build tags
@@ -142,6 +147,27 @@ proto:
 	@echo "=========== Generate Complete ============"
 	@echo
 
+build-gaia-docker:
+	docker build -t cosmos/gaia:$(GAIA_VERSION) --build-arg VERSION=$(GAIA_VERSION) -f ./docker/gaiad/Dockerfile .
+
+build-akash-docker:
+	docker build -t ovrclk/akash:$(AKASH_VERSION) --build-arg VERSION=$(AKASH_VERSION) -f ./docker/akash/Dockerfile .
+
+build-bech32ibc-docker:
+	docker build -t osmosis-labs/bech32ibc:$(BECH32IBC_VERSION) --build-arg VERSION=$(BECH32IBC_VERSION) -f ./docker/bech32ibc/Dockerfile .
+
+relay-test:
+	@TEST_DEBUG=true go test -mod=readonly -v ./test/...
+
+relay-test-gaia:
+	@TEST_DEBUG=true go test -mod=readonly -v ./test/... -run TestGaia*
+
+relay-test-akash:
+	@TEST_DEBUG=true go test -mod=readonly -v ./test/... -run TestAkash*
+
+relay-test-bech32ibc:
+	@TEST_DEBUG=true go test -mod=readonly -v ./test/... -run TestBech32IBC*
+
 test:
 	@go test -v ./x/...
 
@@ -197,8 +223,6 @@ sync-docs:
 ###############################################################################
 ###                           Tests & Simulation                            ###
 ###############################################################################
-
-include sims.mk
 
 test: test-unit test-build
 

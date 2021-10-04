@@ -43,8 +43,6 @@ var ChainID string
 // main function.
 func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 	// Set config for prefixes
-	app.SetConfig()
-
 	encodingConfig := app.MakeEncodingConfig()
 	initClientCtx := client.Context{}.
 		WithJSONMarshaler(encodingConfig.Marshaler).
