@@ -106,7 +106,7 @@ func (k msgServer) Send(goCtx context.Context, msg *types.MsgSend) (*types.MsgSe
 	}
 
 	latestHeight := clientState.GetLatestHeight()
-	timeoutHeight := clienttypes.NewHeight(latestHeight.GetRevisionNumber(), latestHeight.GetRevisionHeight()+1000)
+	timeoutHeight := clienttypes.NewHeight(latestHeight.GetRevisionNumber(), latestHeight.GetRevisionHeight()+msg.ToHeightOffset)
 
 	ibcTransferMsg := ibctransfertypes.NewMsgTransfer(
 		portId,

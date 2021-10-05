@@ -158,13 +158,12 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 	require.NoError(t, err)
 	dst.Log(fmt.Sprintln("proposals.Response", proposals))
 
-	// TODO: check hrp is updated correctly
+	// check hrp is updated correctly
 	hrpRecords, err := QueryHrpIbcRecords(dst)
 	require.NoError(t, err)
 
 	dst.Log(fmt.Sprintln("hrpRecords.Response", hrpRecords))
 
-	// TODO: Broadcast `MsgSend` target address set to native chain address via bech32ics20
 	// check balance changes
 	_, _, err = dst.SendMsg(&bech32ics20types.MsgSend{
 		FromAddress: dst.MustGetAddress().String(),
@@ -173,12 +172,13 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	// TODO: Broadcast `MsgSend` target address set to gaia address via bech32ics20
 	// check balance changes
 	_, _, err = dst.SendMsg(&bech32ics20types.MsgSend{
-		FromAddress: dst.MustGetAddress().String(),
-		ToAddress:   src.MustGetAddress().String(),
-		Amount:      sdk.Coins{testCoin},
+		FromAddress:    dst.MustGetAddress().String(),
+		ToAddress:      src.MustGetAddress().String(),
+		Amount:         sdk.Coins{testCoin},
+		ToHeightOffset: 1000,
+		ToTimeOffset:   0,
 	})
 	require.NoError(t, err)
 
