@@ -22,7 +22,9 @@ func (k Keeper) HandleUpdateHrpIbcChannelProposal(ctx sdk.Context, p *types.Upda
 	}
 
 	return k.setHrpIbcRecord(ctx, types.HrpIbcRecord{
-		Hrp:           p.Hrp,
-		SourceChannel: p.SourceChannel,
+		Hrp:               p.Hrp,
+		SourceChannel:     p.SourceChannel,
+		IcsToHeightOffset: p.IcsToHeightOffset,
+		IcsToTimeOffset:   p.IcsToTimeOffset,
 	})
 }
