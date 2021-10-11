@@ -123,12 +123,13 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 	// Native HRP is set to "stake" as part of genesis in `bech32ibc-setup.sh`
 	// Send a proposal to connect hrp with channel
 	msg, err := govtypes.NewMsgSubmitProposal(
-		&bech32ibctypes.UpdateHrpIbcChannelProposal{
-			Title:         "set hrp for gaia network",
-			Description:   "set hrp for gaia network",
-			Hrp:           gaiaTestConfig.accountPrefix,
-			SourceChannel: dst.PathEnd.ChannelID, // TODO: is this correct?
-		},
+		bech32ibctypes.NewUpdateHrpIBCRecordProposal(
+			"set hrp for gaia network",
+			"set hrp for gaia network",
+			gaiaTestConfig.accountPrefix,
+			dst.PathEnd.ChannelID,
+			1000, 0,
+		),
 		sdk.Coins{initialDeposit},
 		dst.MustGetAddress(),
 	)
@@ -174,11 +175,9 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 
 	// check balance changes
 	_, _, err = dst.SendMsg(&bech32ics20types.MsgSend{
-		FromAddress:    dst.MustGetAddress().String(),
-		ToAddress:      src.MustGetAddress().String(),
-		Amount:         sdk.Coins{testCoin},
-		ToHeightOffset: 1000,
-		ToTimeOffset:   0,
+		FromAddress: dst.MustGetAddress().String(),
+		ToAddress:   src.MustGetAddress().String(),
+		Amount:      sdk.Coins{testCoin},
 	})
 	require.NoError(t, err)
 

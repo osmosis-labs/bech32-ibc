@@ -1,8 +1,6 @@
 package types
 
 import (
-	"time"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/bech32"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -19,13 +17,11 @@ var _ sdk.Msg = &MsgSend{}
 
 // NewMsgSend - construct a msg to send coins from one account to another.
 //nolint:interfacer
-func NewMsgSend(fromAddr, toAddr sdk.AccAddress, amount sdk.Coins, toHeightOffset uint64, toTimeOffset time.Duration) *MsgSend {
+func NewMsgSend(fromAddr, toAddr sdk.AccAddress, amount sdk.Coins) *MsgSend {
 	return &MsgSend{
-		FromAddress:    fromAddr.String(),
-		ToAddress:      toAddr.String(),
-		Amount:         amount,
-		ToHeightOffset: toHeightOffset,
-		ToTimeOffset:   toTimeOffset,
+		FromAddress: fromAddr.String(),
+		ToAddress:   toAddr.String(),
+		Amount:      amount,
 	}
 }
 

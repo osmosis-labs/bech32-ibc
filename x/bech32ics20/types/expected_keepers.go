@@ -7,6 +7,7 @@ import (
 	transfertypes "github.com/cosmos/cosmos-sdk/x/ibc/applications/transfer/types"
 	channeltypes "github.com/cosmos/cosmos-sdk/x/ibc/core/04-channel/types"
 	"github.com/cosmos/cosmos-sdk/x/ibc/core/exported"
+	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 )
 
 // Bech32HrpToSourceChannelMap defines the contract that must be fulfilled by a bech32 prefix to source
@@ -15,6 +16,7 @@ import (
 type Bech32HrpToSourceChannelMap interface {
 	GetHrpSourceChannel(ctx sdk.Context, hrp string) (sourceChannel string, err error)
 	GetNativeHrp(ctx sdk.Context) (hrp string, err error)
+	GetHrpIbcRecord(ctx sdk.Context, hrp string) (bech32ibctypes.HrpIbcRecord, error)
 }
 
 // ICS20TransferMsgServer defines the contract that must be fulfilled by an ICS20 msg server

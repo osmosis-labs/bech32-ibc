@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"time"
+
 	"github.com/cosmos/cosmos-sdk/client/tx"
 
 	"github.com/spf13/cobra"
@@ -11,6 +13,11 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
 	"github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
+)
+
+var (
+	IcsToHeightOffset  = "ics-to-height-offset"
+	IcsToTimeoutOffset = "ics-to-timeout-offset"
 )
 
 func NewTxCmd() *cobra.Command {
@@ -64,7 +71,18 @@ func NewCmdSubmitUpdateHrpIbcRecordProposal() *cobra.Command {
 				return err
 			}
 
-			content := types.NewUpdateHrpIBCRecordProposal(title, description, hrp, channelId)
+			heightOffset, err := cmd.Flags().GetUint64(IcsToHeightOffset)
+			if err != nil {
+				return err
+			}
+
+			durationOffsetText, err := cmd.Flags().GetString(IcsToTimeoutOffset)
+			if err != nil {
+				return err
+			}
+			durationOffset, err := time.ParseDuration(durationOffsetText)
+
+			content := types.NewUpdateHrpIBCRecordProposal(title, description, hrp, channelId, heightOffset, durationOffset)
 
 			msg, err := govtypes.NewMsgSubmitProposal(content, deposit, from)
 			if err != nil {
@@ -82,6 +100,8 @@ func NewCmdSubmitUpdateHrpIbcRecordProposal() *cobra.Command {
 	cmd.Flags().String(cli.FlagTitle, "", "title of proposal")
 	cmd.Flags().String(cli.FlagDescription, "", "description of proposal")
 	cmd.Flags().String(cli.FlagDeposit, "", "deposit of proposal")
+	cmd.Flags().Uint64(IcsToHeightOffset, 0, "the offset of height to expire on target chain")
+	cmd.Flags().String(IcsToTimeoutOffset, "", "the offset of timeout to expire on target chain")
 	cmd.MarkFlagRequired(cli.FlagTitle)
 	cmd.MarkFlagRequired(cli.FlagDescription)
 

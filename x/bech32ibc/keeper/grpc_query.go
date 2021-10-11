@@ -21,7 +21,7 @@ func (k Keeper) HrpIbcRecords(ctx context.Context, _ *types.QueryHrpIbcRecordsRe
 	return &types.QueryHrpIbcRecordsResponse{HrpIbcRecords: records}, nil
 }
 
-func (k Keeper) HrpSourceChannel(ctx context.Context, req *types.QueryHrpSourceChannelRequest) (*types.QueryHrpSourceChannelResponse, error) {
+func (k Keeper) HrpIbcRecord(ctx context.Context, req *types.QueryHrpIbcRecordRequest) (*types.QueryHrpIbcRecordResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -34,7 +34,7 @@ func (k Keeper) HrpSourceChannel(ctx context.Context, req *types.QueryHrpSourceC
 		return nil, err
 	}
 
-	return &types.QueryHrpSourceChannelResponse{SourceChannel: record.GetSourceChannel()}, nil
+	return &types.QueryHrpIbcRecordResponse{HrpIbcRecord: record}, nil
 }
 
 func (k Keeper) NativeHrp(ctx context.Context, _ *types.QueryNativeHrpRequest) (*types.QueryNativeHrpResponse, error) {

@@ -24,7 +24,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 
 	cmd.AddCommand(
 		GetCmdHrpIbcRecords(),
-		GetCmdHrpSourceChannel(),
+		GetCmdHrpIbcRecord(),
 		GetCmdNativeHrp(),
 	)
 
@@ -66,8 +66,8 @@ $ %s query bech32ibc hrp-ibc-records
 	return cmd
 }
 
-// GetCmdHrpSourceChannel returns the source channel associated with a specific bech32 prefix
-func GetCmdHrpSourceChannel() *cobra.Command {
+// GetCmdHrpIbcRecord returns the source channel associated with a specific bech32 prefix
+func GetCmdHrpIbcRecord() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "hrp-ibc-record",
 		Short: "Query the pool id associated with a specific whitelisted fee token",
@@ -87,7 +87,7 @@ $ %s query bech32ibc hrp-ibc-record [source-channel]
 			}
 			queryClient := types.NewQueryClient(clientCtx)
 
-			res, err := queryClient.HrpSourceChannel(cmd.Context(), &types.QueryHrpSourceChannelRequest{
+			res, err := queryClient.HrpIbcRecord(cmd.Context(), &types.QueryHrpIbcRecordRequest{
 				Hrp: args[0],
 			})
 			if err != nil {
