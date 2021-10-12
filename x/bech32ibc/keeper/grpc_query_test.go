@@ -18,7 +18,7 @@ func (suite *KeeperTestSuite) TestHrpSourceChannel() {
 	suite.SetupTest()
 
 	// check genesis source channel
-	resp, err := suite.queryClient.HrpSourceChannel(sdk.WrapSDKContext(suite.ctx), &types.QueryHrpSourceChannelRequest{
+	resp, err := suite.queryClient.HrpIbcRecord(sdk.WrapSDKContext(suite.ctx), &types.QueryHrpIbcRecordRequest{
 		Hrp: "akash",
 	})
 	suite.Require().Error(err)

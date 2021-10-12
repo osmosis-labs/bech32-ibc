@@ -1,5 +1,5 @@
 # https://hub.docker.com/r/ovrclk/akash/tags?page=1&ordering=last_updated
-FROM osmosis-labs/bech32ibc:83605be3ec657fe1690e6c63099dab55898e59a5
+FROM osmosis-labs/bech32ibc:da6057497d70efd96faa1aa9bb59898dbce8a91a
 
 # Set up dependencies
 ENV PACKAGES curl make git libc-dev bash gcc linux-headers eudev-dev python3

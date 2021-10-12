@@ -87,7 +87,7 @@ func (k msgServer) Send(goCtx context.Context, msg *types.MsgSend) (*types.MsgSe
 		return &types.MsgSendResponse{}, nil
 	}
 
-	sourceChannel, err := k.hrpToChannelMapper.GetHrpSourceChannel(ctx, prefix)
+	ibcRecord, err := k.hrpToChannelMapper.GetHrpIbcRecord(ctx, prefix)
 	if err != nil {
 		return nil, err
 	}
@@ -100,17 +100,17 @@ func (k msgServer) Send(goCtx context.Context, msg *types.MsgSend) (*types.MsgSe
 	}
 
 	portId := k.tk.GetPort(ctx)
-	_, clientState, err := k.channelKeeper.GetChannelClientState(ctx, portId, sourceChannel)
+	_, clientState, err := k.channelKeeper.GetChannelClientState(ctx, portId, ibcRecord.SourceChannel)
 	if err != nil {
 		return nil, err
 	}
 
 	latestHeight := clientState.GetLatestHeight()
-	timeoutHeight := clienttypes.NewHeight(latestHeight.GetRevisionNumber(), latestHeight.GetRevisionHeight()+1000)
+	timeoutHeight := clienttypes.NewHeight(latestHeight.GetRevisionNumber(), latestHeight.GetRevisionHeight()+ibcRecord.IcsToHeightOffset)
 
 	ibcTransferMsg := ibctransfertypes.NewMsgTransfer(
 		portId,
-		sourceChannel,
+		ibcRecord.SourceChannel,
 		msg.Amount[0],
 		from,
 		msg.ToAddress,

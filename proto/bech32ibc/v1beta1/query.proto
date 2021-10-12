@@ -7,7 +7,7 @@ import "google/protobuf/duration.proto";
 
 import "osmosis/bech32ibc/v1beta1/types.proto";
 
-option go_package = "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types";
+option go_package = "github.com/osmosis-labs/osmosis/x/bech32ibc/types";
 
 service Query {
   // HrpIbcRecords returns to full list of records
@@ -17,8 +17,8 @@ service Query {
   }
 
   // HrpIbcRecord returns the record for a requested HRP
-  rpc HrpSourceChannel(QueryHrpSourceChannelRequest)
-      returns (QueryHrpSourceChannelResponse) {
+  rpc HrpIbcRecord(QueryHrpIbcRecordRequest)
+      returns (QueryHrpIbcRecordResponse) {
     option (google.api.http).get =
         "/osmosis/txfees/v1beta1/hrp_source_channel/{hrp}";
   }
@@ -31,19 +31,20 @@ service Query {
 
 message QueryHrpIbcRecordsRequest {}
 message QueryHrpIbcRecordsResponse {
-
   repeated HrpIbcRecord hrp_ibc_records = 1 [
     (gogoproto.moretags) = "yaml:\"hrp_ibc_records\"",
     (gogoproto.nullable) = false
   ];
 }
 
-message QueryHrpSourceChannelRequest {
+message QueryHrpIbcRecordRequest {
   string hrp = 1 [ (gogoproto.moretags) = "yaml:\"hrp\"" ];
 }
-message QueryHrpSourceChannelResponse {
-  string source_channel = 1
-      [ (gogoproto.moretags) = "yaml:\"source_channel\"" ];
+message QueryHrpIbcRecordResponse {
+  HrpIbcRecord hrp_ibc_record = 1 [
+    (gogoproto.moretags) = "yaml:\"hrp_ibc_record\"",
+    (gogoproto.nullable) = false
+  ];
 }
 
 message QueryNativeHrpRequest {}

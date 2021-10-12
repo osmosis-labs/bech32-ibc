@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"strings"
+	time "time"
 
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 )
@@ -18,12 +19,14 @@ func init() {
 
 var _ govtypes.Content = &UpdateHrpIbcChannelProposal{}
 
-func NewUpdateHrpIBCRecordProposal(title, description, hrp, sourceChannel string) govtypes.Content {
+func NewUpdateHrpIBCRecordProposal(title, description, hrp, sourceChannel string, toHeightOffset uint64, toTimeOffset time.Duration) govtypes.Content {
 	return &UpdateHrpIbcChannelProposal{
-		Title:         title,
-		Description:   description,
-		Hrp:           hrp,
-		SourceChannel: sourceChannel,
+		Title:             title,
+		Description:       description,
+		Hrp:               hrp,
+		SourceChannel:     sourceChannel,
+		IcsToHeightOffset: toHeightOffset,
+		IcsToTimeOffset:   toTimeOffset,
 	}
 }
 
@@ -41,6 +44,9 @@ func (p *UpdateHrpIbcChannelProposal) ValidateBasic() error {
 	err := govtypes.ValidateAbstract(p)
 	if err != nil {
 		return err
+	}
+	if p.IcsToHeightOffset == 0 && p.IcsToTimeOffset == 0 {
+		return ErrInvalidOffsetHeightTimeout
 	}
 	return ValidateHrp(p.Hrp)
 }
