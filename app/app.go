@@ -85,7 +85,6 @@ import (
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 	"github.com/osmosis-labs/bech32-ibc/x/bech32ics20"
 	bech32ics20keeper "github.com/osmosis-labs/bech32-ibc/x/bech32ics20/keeper"
-	bech32ics20types "github.com/osmosis-labs/bech32-ibc/x/bech32ics20/types"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
@@ -420,7 +419,7 @@ func New(
 		evidencetypes.ModuleName,
 		ibctransfertypes.ModuleName,
 		bech32ibctypes.ModuleName,
-		bech32ics20types.ModuleName,
+		// bech32ics20types.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	)
 
