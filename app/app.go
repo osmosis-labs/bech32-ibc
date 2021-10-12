@@ -372,7 +372,7 @@ func New(
 		),
 		auth.NewAppModule(appCodec, app.AccountKeeper, nil),
 		vesting.NewAppModule(app.AccountKeeper, app.BankKeeper),
-		bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper),
+		bank.NewAppModule(appCodec, app.Bech32ICS20Keeper, app.AccountKeeper),
 		capability.NewAppModule(appCodec, *app.CapabilityKeeper),
 		crisis.NewAppModule(&app.CrisisKeeper, skipGenesisInvariants),
 		gov.NewAppModule(appCodec, app.GovKeeper, app.AccountKeeper, app.BankKeeper),
@@ -386,7 +386,7 @@ func New(
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
 		bech32ibc.NewAppModule(appCodec, app.Bech32IBCKeeper),
-		bech32ics20.NewAppModule(appCodec, app.Bech32ICS20Keeper),
+		// bech32ics20.NewAppModule(appCodec, app.Bech32ICS20Keeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
