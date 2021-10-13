@@ -34,7 +34,9 @@ To launch your blockchain live on mutliple nodes use `starport network` commands
 
 Broadcast `banktypes.MsgSend` where target address is set to native chain address or altchain address - execution of these messages is handled by `bech32ics20` module.
 
+```sh
 bech32ibcd tx bank send validator <native_chain_or_altchain_address> 100uosmo --keyring-backend=test --chain-id=testing --yes
+```
 
 ## Learn more
 
