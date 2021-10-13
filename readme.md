@@ -32,8 +32,9 @@ To launch your blockchain live on mutliple nodes use `starport network` commands
 
 ### Test out IBC sends to (1) a live chain, (2) a chain that is offline, and recover the funds that get stuck in Althea
 
-Broadcast `banktypes.MsgSend` or `banktypes.MsgMultiSend` target address set to native chain address or altchain address - execution of these messages is handled by `bech32ics20` module.
+Broadcast `banktypes.MsgSend` where target address is set to native chain address or altchain address - execution of these messages is handled by `bech32ics20` module.
 
+bech32ibcd tx bank send validator <native_chain_or_altchain_address> 100uosmo --keyring-backend=test --chain-id=testing --yes
 
 ## Learn more
 
