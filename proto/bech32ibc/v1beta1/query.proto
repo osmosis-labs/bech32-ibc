@@ -1,13 +1,13 @@
 syntax = "proto3";
-package osmosis.bech32ibc.v1beta1;
+package bech32ibc.bech32ibc.v1beta1;
 
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/duration.proto";
 
-import "osmosis/bech32ibc/v1beta1/types.proto";
+import "bech32ibc/v1beta1/types.proto";
 
-option go_package = "github.com/osmosis-labs/osmosis/x/bech32ibc/types";
+option go_package = "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types";
 
 service Query {
   // HrpIbcRecords returns to full list of records
