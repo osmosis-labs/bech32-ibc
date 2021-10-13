@@ -385,7 +385,6 @@ func New(
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
 		bech32ibc.NewAppModule(appCodec, app.Bech32IBCKeeper),
-		// bech32ics20.NewAppModule(appCodec, app.Bech32ICS20Keeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -419,8 +418,6 @@ func New(
 		evidencetypes.ModuleName,
 		ibctransfertypes.ModuleName,
 		bech32ibctypes.ModuleName,
-		// bech32ics20types.ModuleName,
-		// this line is used by starport scaffolding # stargate/app/initGenesis
 	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
