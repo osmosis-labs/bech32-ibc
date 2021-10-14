@@ -40,7 +40,7 @@ type AppModuleBasic struct {
 // Name returns the bank module's name.
 func (AppModuleBasic) Name() string { return types.ModuleName }
 
-// RegisterLegacyAminoCodec registers the bank module's types on the LegacyAmino codec.
+// RegisterLegacyAminoCodec registers the bech32ics20 module's types on the LegacyAmino codec.
 func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	types.RegisterLegacyAminoCodec(cdc)
 }
