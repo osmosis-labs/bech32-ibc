@@ -129,7 +129,7 @@ func (am AppModule) LegacyQuerierHandler(legacyQuerierCdc *codec.LegacyAmino) sd
 	return nil
 }
 
-// InitGenesis performs genesis initialization for the bank module. It returns
+// InitGenesis performs genesis initialization for the bech32ics20 module. It returns
 // no validator updates.
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONMarshaler, data json.RawMessage) []abci.ValidatorUpdate {
 	start := time.Now()
