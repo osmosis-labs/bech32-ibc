@@ -18,7 +18,7 @@ type (
 		tk                     types.TransferKeeper
 		hrpToChannelMapper     types.Bech32HrpToSourceChannelMap
 		ics20TransferMsgServer types.ICS20TransferMsgServer
-		cdc                    codec.Marshaler
+		cdc                    codec.Codec
 		storeKey               sdk.StoreKey
 		memKey                 sdk.StoreKey
 	}
@@ -30,7 +30,7 @@ func NewKeeper(
 	tk types.TransferKeeper,
 	hrpToChannelMapper types.Bech32HrpToSourceChannelMap,
 	ics20TransferMsgServer types.ICS20TransferMsgServer,
-	cdc codec.Marshaler,
+	cdc codec.Codec,
 ) *Keeper {
 	return &Keeper{
 		Keeper:                 bk,
