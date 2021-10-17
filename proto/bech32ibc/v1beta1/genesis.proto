@@ -1,8 +1,8 @@
 syntax = "proto3";
-package osmosis.bech32ibc.v1beta1;
+package bech32ibc.bech32ibc.v1beta1;
 
 import "gogoproto/gogo.proto";
-import "osmosis/bech32ibc/v1beta1/types.proto";
+import "bech32ibc/v1beta1/types.proto";
 
 option go_package = "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types";
 

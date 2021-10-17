@@ -12,7 +12,6 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	ibctransfertypes "github.com/cosmos/cosmos-sdk/x/ibc/applications/transfer/types"
 	clienttypes "github.com/cosmos/cosmos-sdk/x/ibc/core/02-client/types"
-	"github.com/osmosis-labs/bech32-ibc/x/bech32ics20/types"
 )
 
 type msgServer struct {
@@ -21,16 +20,16 @@ type msgServer struct {
 
 // NewMsgServerImpl returns an implementation of the bank MsgServer interface
 // for the provided Keeper.
-func NewMsgServerImpl(keeper Keeper) types.MsgServer {
+func NewMsgServerImpl(keeper Keeper) banktypes.MsgServer {
 	return &msgServer{Keeper: keeper}
 }
 
-var _ types.MsgServer = msgServer{}
+var _ banktypes.MsgServer = msgServer{}
 
-func (k msgServer) Send(goCtx context.Context, msg *types.MsgSend) (*types.MsgSendResponse, error) {
+func (k msgServer) Send(goCtx context.Context, msg *banktypes.MsgSend) (*banktypes.MsgSendResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	if err := k.bk.SendEnabledCoins(ctx, msg.Amount...); err != nil {
+	if err := k.SendEnabledCoins(ctx, msg.Amount...); err != nil {
 		return nil, err
 	}
 
@@ -56,11 +55,11 @@ func (k msgServer) Send(goCtx context.Context, msg *types.MsgSend) (*types.MsgSe
 			return nil, err
 		}
 
-		if k.bk.BlockedAddr(to) {
+		if k.BlockedAddr(to) {
 			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnauthorized, "%s is not allowed to receive funds", msg.ToAddress)
 		}
 
-		err = k.bk.SendCoins(ctx, from, to, msg.Amount)
+		err = k.SendCoins(ctx, from, to, msg.Amount)
 		if err != nil {
 			return nil, err
 		}
@@ -84,7 +83,7 @@ func (k msgServer) Send(goCtx context.Context, msg *types.MsgSend) (*types.MsgSe
 			),
 		)
 
-		return &types.MsgSendResponse{}, nil
+		return &banktypes.MsgSendResponse{}, nil
 	}
 
 	ibcRecord, err := k.hrpToChannelMapper.GetHrpIbcRecord(ctx, prefix)
@@ -119,15 +118,15 @@ func (k msgServer) Send(goCtx context.Context, msg *types.MsgSend) (*types.MsgSe
 
 	_, err = k.ics20TransferMsgServer.Transfer(sdk.WrapSDKContext(ctx), ibcTransferMsg)
 
-	return &types.MsgSendResponse{}, err
+	return &banktypes.MsgSendResponse{}, err
 }
 
-func (k msgServer) MultiSend(goCtx context.Context, msg *types.MsgMultiSend) (*types.MsgMultiSendResponse, error) {
+func (k msgServer) MultiSend(goCtx context.Context, msg *banktypes.MsgMultiSend) (*banktypes.MsgMultiSendResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// NOTE: totalIn == totalOut should already have been checked
 	for _, in := range msg.Inputs {
-		if err := k.bk.SendEnabledCoins(ctx, in.Coins...); err != nil {
+		if err := k.SendEnabledCoins(ctx, in.Coins...); err != nil {
 			return nil, err
 		}
 	}
@@ -137,12 +136,12 @@ func (k msgServer) MultiSend(goCtx context.Context, msg *types.MsgMultiSend) (*t
 		if err != nil {
 			panic(err)
 		}
-		if k.bk.BlockedAddr(accAddr) {
+		if k.BlockedAddr(accAddr) {
 			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnauthorized, "%s is not allowed to receive transactions", out.Address)
 		}
 	}
 
-	err := k.bk.InputOutputCoins(ctx, msg.Inputs, msg.Outputs)
+	err := k.InputOutputCoins(ctx, msg.Inputs, msg.Outputs)
 	if err != nil {
 		return nil, err
 	}
@@ -154,5 +153,5 @@ func (k msgServer) MultiSend(goCtx context.Context, msg *types.MsgMultiSend) (*t
 		),
 	)
 
-	return &types.MsgMultiSendResponse{}, nil
+	return &banktypes.MsgMultiSendResponse{}, nil
 }

@@ -7,11 +7,11 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/cosmos/relayer/relayer"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
-	bech32ics20types "github.com/osmosis-labs/bech32-ibc/x/bech32ics20/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -166,7 +166,7 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 	dst.Log(fmt.Sprintln("hrpRecords.Response", hrpRecords))
 
 	// check balance changes
-	_, _, err = dst.SendMsg(&bech32ics20types.MsgSend{
+	_, _, err = dst.SendMsg(&banktypes.MsgSend{
 		FromAddress: dst.MustGetAddress().String(),
 		ToAddress:   dst.MustGetAddress().String(),
 		Amount:      sdk.Coins{testCoin},
@@ -174,7 +174,7 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 	require.NoError(t, err)
 
 	// check balance changes
-	_, _, err = dst.SendMsg(&bech32ics20types.MsgSend{
+	_, _, err = dst.SendMsg(&banktypes.MsgSend{
 		FromAddress: dst.MustGetAddress().String(),
 		ToAddress:   src.MustGetAddress().String(),
 		Amount:      sdk.Coins{testCoin},

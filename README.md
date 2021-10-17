@@ -18,11 +18,25 @@ Your blockchain in development can be configured with `config.yml`. To learn mor
 
 To launch your blockchain live on mutliple nodes use `starport network` commands. Learn more about [Starport Network](https://github.com/tendermint/spn).
 
-## Process of sending assets via `bech32ibc` and `bech32ics20`
+## What needs to be tested on Althea testnet
+
+### Make IBC channels
+### Make governance proposal to connect HRP and IBC channel
 
 - Native HRP should be set in `bech32ibc` module's genesis
 - Connect HRP to IBC Channel via governance proposal (`bech32ibc` module's `UpdateHrpIbcChannelProposal`), e.g. connect `osmo1` prefix to the IBC channel with Osmosis.
-- Broadcast `MsgSend` or `MsgMultiSend` target address set to native chain address or altchain address - execution of these messages is handled by `bech32ics20` module.
+
+```sh
+<daemon> tx bech32ibc update-hrp-ibc-record [human-readable-prefix] [channel-id] --title="set hrp for x network" --description="set hrp for x network description." --deposit="" --ics-to-height-offset=1000 ics-to-timeout-offset="0s" 
+```
+
+### Test out IBC sends to (1) a live chain, (2) a chain that is offline, and recover the funds that get stuck in Althea
+
+Broadcast `banktypes.MsgSend` where target address is set to native chain address or altchain address - execution of these messages is handled by `bech32ics20` module.
+
+```sh
+bech32ibcd tx bank send validator <native_chain_or_altchain_address> 100uosmo --keyring-backend=test --chain-id=testing --yes
+```
 
 ## Learn more
 
