@@ -29,7 +29,7 @@ var _ banktypes.MsgServer = msgServer{}
 func (k msgServer) Send(goCtx context.Context, msg *banktypes.MsgSend) (*banktypes.MsgSendResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	if err := k.SendEnabledCoins(ctx, msg.Amount...); err != nil {
+	if err := k.IsSendEnabledCoins(ctx, msg.Amount...); err != nil {
 		return nil, err
 	}
 
@@ -111,7 +111,7 @@ func (k msgServer) Send(goCtx context.Context, msg *banktypes.MsgSend) (*banktyp
 		portId,
 		ibcRecord.SourceChannel,
 		msg.Amount[0],
-		from,
+		from.String(),
 		msg.ToAddress,
 		timeoutHeight, 0, // Use no timeouts for now.  Can add this in future.
 	)
@@ -120,13 +120,12 @@ func (k msgServer) Send(goCtx context.Context, msg *banktypes.MsgSend) (*banktyp
 
 	return &banktypes.MsgSendResponse{}, err
 }
-
 func (k msgServer) MultiSend(goCtx context.Context, msg *banktypes.MsgMultiSend) (*banktypes.MsgMultiSendResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// NOTE: totalIn == totalOut should already have been checked
 	for _, in := range msg.Inputs {
-		if err := k.SendEnabledCoins(ctx, in.Coins...); err != nil {
+		if err := k.IsSendEnabledCoins(ctx, in.Coins...); err != nil {
 			return nil, err
 		}
 	}
