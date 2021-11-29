@@ -92,7 +92,7 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 	require.NoError(t, err)
 
 	// create path
-	_, err = src.CreateClients(dst)
+	_, err = src.CreateClients(dst, true, true, false)
 	require.NoError(t, err)
 	testClientPair(t, src, dst)
 
@@ -105,34 +105,38 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 	testChannelPair(t, src, dst)
 
 	// send a couple of transfers to the queue on src
-	require.NoError(t, src.SendTransferMsg(dst, testCoin, dst.MustGetAddress().String(), 0, 0))
-	require.NoError(t, src.SendTransferMsg(dst, testCoin, dst.MustGetAddress().String(), 0, 0))
+	require.NoError(t, src.SendTransferMsg(dst, testCoin, dst.MustGetAddress(), 0, 0))
+	require.NoError(t, src.SendTransferMsg(dst, testCoin, dst.MustGetAddress(), 0, 0))
 
 	// send a couple of transfers to the queue on dst
-	require.NoError(t, dst.SendTransferMsg(src, testCoin, src.MustGetAddress().String(), 0, 0))
-	require.NoError(t, dst.SendTransferMsg(src, testCoin, src.MustGetAddress().String(), 0, 0))
+	require.NoError(t, dst.SendTransferMsg(src, testCoin, src.MustGetAddress(), 0, 0))
+	require.NoError(t, dst.SendTransferMsg(src, testCoin, src.MustGetAddress(), 0, 0))
 
 	validators, err := QueryValidators(dst)
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, len(validators), 1)
 
-	resp, _, err := dst.SendMsg(stakingtypes.NewMsgDelegate(dst.MustGetAddress(), validators[0].GetOperator(), delegationAmt))
+	resp, _, err := dst.SendMsg(&stakingtypes.MsgDelegate{
+		DelegatorAddress: dst.MustGetAddress(),
+		ValidatorAddress: validators[0].OperatorAddress,
+		Amount:           delegationAmt,
+	})
 	require.NoError(t, err)
 	dst.Log(fmt.Sprintln("MsgDelegate.Response", resp.Logs))
 
 	// Native HRP is set to "stake" as part of genesis in `bech32ibc-setup.sh`
 	// Send a proposal to connect hrp with channel
-	msg, err := govtypes.NewMsgSubmitProposal(
-		bech32ibctypes.NewUpdateHrpIBCRecordProposal(
-			"set hrp for gaia network",
-			"set hrp for gaia network",
-			gaiaTestConfig.accountPrefix,
-			dst.PathEnd.ChannelID,
-			1000, 0,
-		),
-		sdk.Coins{initialDeposit},
-		dst.MustGetAddress(),
-	)
+	msg := &govtypes.MsgSubmitProposal{
+		InitialDeposit: sdk.Coins{initialDeposit},
+		Proposer:       dst.MustGetAddress(),
+	}
+	err = msg.SetContent(bech32ibctypes.NewUpdateHrpIBCRecordProposal(
+		"set hrp for gaia network",
+		"set hrp for gaia network",
+		gaiaTestConfig.accountPrefix,
+		dst.PathEnd.ChannelID,
+		1000, 0,
+	))
 	require.NoError(t, err)
 	resp, _, err = dst.SendMsg(msg)
 	require.NoError(t, err)
@@ -145,7 +149,11 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 	require.NoError(t, err)
 
 	// approve the proposal
-	resp, _, err = dst.SendMsg(govtypes.NewMsgVote(dst.MustGetAddress(), uint64(proposalID), govtypes.OptionYes))
+	resp, _, err = dst.SendMsg(&govtypes.MsgVote{
+		Voter:      dst.MustGetAddress(),
+		ProposalId: uint64(proposalID),
+		Option:     govtypes.OptionYes,
+	})
 	require.NoError(t, err)
 
 	dst.Log(fmt.Sprintln("MsgVote.Response", resp.Logs))
@@ -167,16 +175,16 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 
 	// check balance changes
 	_, _, err = dst.SendMsg(&banktypes.MsgSend{
-		FromAddress: dst.MustGetAddress().String(),
-		ToAddress:   dst.MustGetAddress().String(),
+		FromAddress: dst.MustGetAddress(),
+		ToAddress:   dst.MustGetAddress(),
 		Amount:      sdk.Coins{testCoin},
 	})
 	require.NoError(t, err)
 
 	// check balance changes
 	_, _, err = dst.SendMsg(&banktypes.MsgSend{
-		FromAddress: dst.MustGetAddress().String(),
-		ToAddress:   src.MustGetAddress().String(),
+		FromAddress: dst.MustGetAddress(),
+		ToAddress:   src.MustGetAddress(),
 		Amount:      sdk.Coins{testCoin},
 	})
 	require.NoError(t, err)
@@ -193,8 +201,8 @@ func TestBech32IBCStreamingRelayer(t *testing.T) {
 	require.NoError(t, dst.WaitForNBlocks(1))
 
 	// send those tokens from dst back to dst and src back to src
-	require.NoError(t, src.SendTransferMsg(dst, twoTestCoin, dst.MustGetAddress().String(), 0, 0))
-	require.NoError(t, dst.SendTransferMsg(src, twoTestCoin, src.MustGetAddress().String(), 0, 0))
+	require.NoError(t, src.SendTransferMsg(dst, twoTestCoin, dst.MustGetAddress(), 0, 0))
+	require.NoError(t, dst.SendTransferMsg(src, twoTestCoin, src.MustGetAddress(), 0, 0))
 
 	// wait for packet processing
 	require.NoError(t, dst.WaitForNBlocks(6))
