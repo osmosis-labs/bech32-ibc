@@ -330,11 +330,6 @@ func New(
 	// If evidence needs to be handled for the app, set routes in router here and seal
 	app.EvidenceKeeper = *evidenceKeeper
 
-	app.Bech32IBCKeeper = *bech32ibckeeper.NewKeeper(
-		app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
-		app.TransferKeeper,
-	)
-
 	// register the proposal types
 	govRouter := govtypes.NewRouter()
 	govRouter.AddRoute(govtypes.RouterKey, govtypes.ProposalHandler).
