@@ -136,6 +136,7 @@ require (
 replace (
 	github.com/cosmos/cosmos-sdk => github.com/osmosis-labs/cosmos-sdk v0.43.0-rc3.0.20211207225141-220d415f6b2a
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alpha.regen.4
+	github.com/tendermint/tm-db => github.com/osmosis-labs/tm-db v0.6.5-0.20210911033928-ba9154613417
 	google.golang.org/grpc => google.golang.org/grpc v1.33.2
 
 )
