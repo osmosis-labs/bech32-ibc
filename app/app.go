@@ -137,7 +137,7 @@ var (
 		transfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		bech32ibc.AppModuleBasic{},
-		bech32ics20.AppModuleBasic{},
+		bank.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
 

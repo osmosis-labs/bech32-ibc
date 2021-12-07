@@ -13,6 +13,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/cosmos/cosmos-sdk/x/bank/simulation"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
 
@@ -21,7 +22,6 @@ import (
 
 var (
 	_ module.AppModule           = AppModule{}
-	_ module.AppModuleBasic      = AppModuleBasic{}
 	_ module.AppModuleSimulation = AppModule{}
 )
 
@@ -38,14 +38,14 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
 	types.RegisterQueryServer(cfg.QueryServer(), am.keeper)
 
-	m := keeper.NewMigrator(am.keeper.(keeper.BaseKeeper))
+	m := bankkeeper.NewMigrator(am.keeper.Keeper.(bankkeeper.BaseKeeper))
 	cfg.RegisterMigration(types.ModuleName, 1, m.Migrate1to2)
 }
 
 // NewAppModule creates a new AppModule object
 func NewAppModule(cdc codec.Codec, keeper keeper.Keeper) AppModule {
 	return AppModule{
-		AppModuleBasic: bank.AppModuleBasic{cdc: cdc},
+		AppModuleBasic: bank.NewAppModuleBasic(cdc),
 
 		keeper: keeper,
 	}
@@ -56,7 +56,7 @@ func (AppModule) Name() string { return types.ModuleName }
 
 // RegisterInvariants registers the bank module invariants.
 func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {
-	keeper.RegisterInvariants(ir, am.keeper)
+	bankkeeper.RegisterInvariants(ir, am.keeper.Keeper)
 }
 
 // Route returns the message routing key for the bank module.
@@ -69,7 +69,7 @@ func (AppModule) QuerierRoute() string { return types.RouterKey }
 
 // LegacyQuerierHandler returns the bank module sdk.Querier.
 func (am AppModule) LegacyQuerierHandler(legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
-	return keeper.NewQuerier(am.keeper, legacyQuerierCdc)
+	return bankkeeper.NewQuerier(am.keeper, legacyQuerierCdc)
 }
 
 // InitGenesis performs genesis initialization for the bech32ics20 module. It returns
@@ -127,7 +127,5 @@ func (am AppModule) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {}
 
 // WeightedOperations returns the all the gov module operations with their respective weights.
 func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
-	return simulation.WeightedOperations(
-		simState.AppParams, simState.Cdc, am.accountKeeper, am.keeper,
-	)
+	return []simtypes.WeightedOperation{}
 }
