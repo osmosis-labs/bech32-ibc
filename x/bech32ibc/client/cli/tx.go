@@ -41,7 +41,7 @@ func NewCmdSubmitUpdateHrpIbcRecordProposal() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update-hrp-ibc-record [human-readable-prefix] [channel-id]",
 		Args:  cobra.ExactArgs(2),
-		Short: "Submit an update to map a bech32 prefix to a channel id",
+		Short: "Submit an update to map a bech32 prefix to a channel id (test)",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
