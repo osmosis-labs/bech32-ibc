@@ -24,7 +24,7 @@ var (
 func NewTxCmd() *cobra.Command {
 	txCmd := &cobra.Command{
 		Use:                        types.ModuleName,
-		Short:                      "bech32ibc transaction subcommands",
+		Short:                      "bech32ibc transaction subcommands test",
 		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
 		RunE:                       client.ValidateCmd,
