@@ -38,7 +38,12 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
 	types.RegisterQueryServer(cfg.QueryServer(), am.keeper)
 
-	m := bankkeeper.NewMigrator(am.keeper.Keeper.(bankkeeper.BaseKeeper))
+	var m bankkeeper.Migrator
+	if bankPtr, ok := am.keeper.Keeper.(*bankkeeper.BaseKeeper); ok {
+		m = bankkeeper.NewMigrator(*bankPtr)
+	} else {
+		m = bankkeeper.NewMigrator(am.keeper.Keeper.(bankkeeper.BaseKeeper))
+	}
 	cfg.RegisterMigration(types.ModuleName, 1, m.Migrate1to2)
 }
 
