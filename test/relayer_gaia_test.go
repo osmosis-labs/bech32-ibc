@@ -5,10 +5,10 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	clienttypes "github.com/cosmos/cosmos-sdk/x/ibc/core/02-client/types"
-	ibctmtypes "github.com/cosmos/cosmos-sdk/x/ibc/light-clients/07-tendermint/types"
-	ibctesting "github.com/cosmos/cosmos-sdk/x/ibc/testing"
-	ibctestingmock "github.com/cosmos/cosmos-sdk/x/ibc/testing/mock"
+	clienttypes "github.com/cosmos/ibc-go/v2/modules/core/02-client/types"
+	ibctmtypes "github.com/cosmos/ibc-go/v2/modules/light-clients/07-tendermint/types"
+	ibctesting "github.com/cosmos/ibc-go/v2/testing"
+	ibctestingmock "github.com/cosmos/ibc-go/v2/testing/mock"
 	"github.com/cosmos/relayer/relayer"
 	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/crypto/tmhash"
@@ -46,7 +46,7 @@ func TestGaiaToGaiaStreamingRelayer(t *testing.T) {
 	require.NoError(t, err)
 
 	// create path
-	_, err = src.CreateClients(dst)
+	_, err = src.CreateClients(dst, true, true, false)
 	require.NoError(t, err)
 	testClientPair(t, src, dst)
 
@@ -59,12 +59,12 @@ func TestGaiaToGaiaStreamingRelayer(t *testing.T) {
 	testChannelPair(t, src, dst)
 
 	// send a couple of transfers to the queue on src
-	require.NoError(t, src.SendTransferMsg(dst, testCoin, dst.MustGetAddress().String(), 0, 0))
-	require.NoError(t, src.SendTransferMsg(dst, testCoin, dst.MustGetAddress().String(), 0, 0))
+	require.NoError(t, src.SendTransferMsg(dst, testCoin, dst.MustGetAddress(), 0, 0))
+	require.NoError(t, src.SendTransferMsg(dst, testCoin, dst.MustGetAddress(), 0, 0))
 
 	// send a couple of transfers to the queue on dst
-	require.NoError(t, dst.SendTransferMsg(src, testCoin, src.MustGetAddress().String(), 0, 0))
-	require.NoError(t, dst.SendTransferMsg(src, testCoin, src.MustGetAddress().String(), 0, 0))
+	require.NoError(t, dst.SendTransferMsg(src, testCoin, src.MustGetAddress(), 0, 0))
+	require.NoError(t, dst.SendTransferMsg(src, testCoin, src.MustGetAddress(), 0, 0))
 
 	// Wait for message inclusion in both chains
 	require.NoError(t, dst.WaitForNBlocks(1))
@@ -78,8 +78,8 @@ func TestGaiaToGaiaStreamingRelayer(t *testing.T) {
 	require.NoError(t, dst.WaitForNBlocks(1))
 
 	// send those tokens from dst back to dst and src back to src
-	require.NoError(t, src.SendTransferMsg(dst, twoTestCoin, dst.MustGetAddress().String(), 0, 0))
-	require.NoError(t, dst.SendTransferMsg(src, twoTestCoin, src.MustGetAddress().String(), 0, 0))
+	require.NoError(t, src.SendTransferMsg(dst, twoTestCoin, dst.MustGetAddress(), 0, 0))
+	require.NoError(t, dst.SendTransferMsg(src, twoTestCoin, src.MustGetAddress(), 0, 0))
 
 	// wait for packet processing
 	require.NoError(t, dst.WaitForNBlocks(6))
@@ -120,7 +120,7 @@ func TestGaiaReuseIdentifiers(t *testing.T) {
 	require.NoError(t, err)
 
 	// create path
-	_, err = src.CreateClients(dst)
+	_, err = src.CreateClients(dst, true, true, false)
 	require.NoError(t, err)
 	testClientPair(t, src, dst)
 
@@ -143,7 +143,7 @@ func TestGaiaReuseIdentifiers(t *testing.T) {
 	dst.PathEnd.ConnectionID = ""
 	dst.PathEnd.ChannelID = ""
 
-	_, err = src.CreateClients(dst)
+	_, err = src.CreateClients(dst, true, true, false)
 	require.NoError(t, err)
 	testClientPair(t, src, dst)
 
@@ -157,6 +157,20 @@ func TestGaiaReuseIdentifiers(t *testing.T) {
 
 	require.Equal(t, expectedSrc, src)
 	require.Equal(t, expectedDst, dst)
+
+	expectedSrcClient := src.PathEnd.ClientID
+	expectedDstClient := dst.PathEnd.ClientID
+
+	// test client creation with override
+	src.PathEnd.ClientID = ""
+	dst.PathEnd.ClientID = ""
+
+	_, err = src.CreateClients(dst, true, true, true)
+	require.NoError(t, err)
+	testClientPair(t, src, dst)
+
+	require.NotEqual(t, expectedSrcClient, src.PathEnd.ClientID)
+	require.NotEqual(t, expectedDstClient, dst.PathEnd.ClientID)
 }
 
 func TestGaiaMisbehaviourMonitoring(t *testing.T) {
@@ -171,7 +185,7 @@ func TestGaiaMisbehaviourMonitoring(t *testing.T) {
 	require.NoError(t, err)
 
 	// create path
-	_, err = src.CreateClients(dst)
+	_, err = src.CreateClients(dst, true, true, false)
 	require.NoError(t, err)
 	testClientPair(t, src, dst)
 
@@ -197,16 +211,8 @@ func TestGaiaMisbehaviourMonitoring(t *testing.T) {
 	header, err := dst.QueryHeaderAtHeight(latestHeight)
 	require.NoError(t, err)
 
-	clientStateRes, err := src.QueryClientState(latestHeight)
+	clientState, err := src.QueryTMClientState(latestHeight)
 	require.NoError(t, err)
-
-	// unpack any into ibc tendermint client state
-	clientStateExported, err := clienttypes.UnpackClientState(clientStateRes.ClientState)
-	require.NoError(t, err)
-
-	// cast from interface to concrete type
-	clientState, ok := clientStateExported.(*ibctmtypes.ClientState)
-	require.True(t, ok, "error when casting exported clientstate")
 
 	height := clientState.GetLatestHeight().(clienttypes.Height)
 	heightPlus1 := clienttypes.NewHeight(height.RevisionNumber, height.RevisionHeight+1)
@@ -242,19 +248,11 @@ func TestGaiaMisbehaviourMonitoring(t *testing.T) {
 	// kill relayer routine
 	rlyDone()
 
-	clientStateRes, err = src.QueryClientState(0)
+	clientState, err = src.QueryTMClientState(0)
 	require.NoError(t, err)
 
-	// unpack any into ibc tendermint client state
-	clientStateExported, err = clienttypes.UnpackClientState(clientStateRes.ClientState)
-	require.NoError(t, err)
-
-	// cast from interface to concrete type
-	clientState, ok = clientStateExported.(*ibctmtypes.ClientState)
-	require.True(t, ok, "error when casting exported clientstate")
-
-	// clientstate should be frozen
-	require.True(t, clientState.IsFrozen())
+	// clientstate should be frozen i.e., clientstate frozenheight should not be zero
+	require.False(t, clientState.FrozenHeight.IsZero())
 }
 
 func createTMClientHeader(t *testing.T, chainID string, blockHeight int64, trustedHeight clienttypes.Height,
