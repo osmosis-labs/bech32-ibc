@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cosmos/relayer/relayer"
+	"github.com/cosmos/relayer/v2/relayer"
 
 	"github.com/avast/retry-go"
-	clientypes "github.com/cosmos/ibc-go/v2/modules/core/02-client/types"
+	clientypes "github.com/cosmos/ibc-go/v3/modules/core/02-client/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,7 +26,7 @@ func testClient(t *testing.T, src, dst *relayer.Chain) {
 		client *clientypes.QueryClientStateResponse
 	)
 	if err = retry.Do(func() error {
-		client, err = src.QueryClientStateResponse(srch)
+		_, err = src.QueryClientStateResponse(srch)
 		if err != nil {
 			srch, _ = src.QueryLatestHeight()
 		}

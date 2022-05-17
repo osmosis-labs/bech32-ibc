@@ -5,11 +5,11 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	clienttypes "github.com/cosmos/ibc-go/v2/modules/core/02-client/types"
-	ibctmtypes "github.com/cosmos/ibc-go/v2/modules/light-clients/07-tendermint/types"
-	ibctesting "github.com/cosmos/ibc-go/v2/testing"
-	ibctestingmock "github.com/cosmos/ibc-go/v2/testing/mock"
-	"github.com/cosmos/relayer/relayer"
+	clienttypes "github.com/cosmos/ibc-go/v3/modules/core/02-client/types"
+	ibctmtypes "github.com/cosmos/ibc-go/v3/modules/light-clients/07-tendermint/types"
+	ibctesting "github.com/cosmos/ibc-go/v3/testing"
+	ibctestingmock "github.com/cosmos/ibc-go/v3/testing/mock"
+	"github.com/cosmos/relayer/v2/relayer"
 	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/crypto/tmhash"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
@@ -214,8 +214,8 @@ func TestGaiaMisbehaviourMonitoring(t *testing.T) {
 	clientState, err := src.QueryTMClientState(latestHeight)
 	require.NoError(t, err)
 
-	height := clientState.GetLatestHeight().(clienttypes.Height)
-	heightPlus1 := clienttypes.NewHeight(height.RevisionNumber, height.RevisionHeight+1)
+	height := clientState.GetLatestHeight()
+	heightPlus1 := clienttypes.NewHeight(height.GetRevisionHeight(), height.GetRevisionHeight()+1)
 
 	// setup validator for signing duplicate header
 	// use key for dst
@@ -229,9 +229,24 @@ func TestGaiaMisbehaviourMonitoring(t *testing.T) {
 	valSet := tmtypes.NewValidatorSet([]*tmtypes.Validator{validator})
 	signers := []tmtypes.PrivValidator{privVal}
 
+	newHeight := clienttypes.Height{
+		RevisionHeight: height.GetRevisionHeight(),
+		RevisionNumber: height.GetRevisionNumber(),
+	}
+
+	newheader := &ibctmtypes.Header{
+		SignedHeader: header.SignedHeader,
+		ValidatorSet: header.ValidatorSet,
+		TrustedHeight: clienttypes.Height{
+			RevisionHeight: header.TrustedHeight.GetRevisionHeight(),
+			RevisionNumber: header.TrustedHeight.GetRevisionNumber(),
+		},
+		TrustedValidators: header.TrustedValidators,
+	}
+
 	// creating duplicate header
-	newHeader := createTMClientHeader(t, dst.ChainID, int64(heightPlus1.RevisionHeight), height,
-		header.GetTime().Add(time.Minute), valSet, valSet, signers, header)
+	newHeader := createTMClientHeader(t, dst.ChainID, int64(heightPlus1.RevisionHeight), newHeight,
+		header.GetTime().Add(time.Minute), valSet, valSet, signers, newheader)
 
 	// update client with duplicate header
 	updateMsg, err := clienttypes.NewMsgUpdateClient(src.PathEnd.ClientID, newHeader, src.MustGetAddress())

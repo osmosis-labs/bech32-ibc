@@ -10,7 +10,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/cosmos/relayer/relayer"
+	"github.com/cosmos/relayer/v2/relayer"
 
 	"github.com/ory/dockertest/v3"
 	dc "github.com/ory/dockertest/v3/docker"

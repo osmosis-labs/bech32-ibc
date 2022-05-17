@@ -3,7 +3,7 @@ package test
 import (
 	"testing"
 
-	"github.com/cosmos/relayer/relayer"
+	"github.com/cosmos/relayer/v2/relayer"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
@@ -31,6 +31,7 @@ func TestAkashToGaiaStreamingRelayer(t *testing.T) {
 	require.NoError(t, err)
 
 	// query initial balances to compare against at the end
+
 	srcExpected, err := src.QueryBalance(src.Key)
 	require.NoError(t, err)
 	dstExpected, err := dst.QueryBalance(dst.Key)

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cosmos/relayer/relayer"
+	"github.com/cosmos/relayer/v2/relayer"
 
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/stretchr/testify/require"
