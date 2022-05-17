@@ -147,7 +147,8 @@ require (
 )
 
 replace (
-	github.com/cosmos/cosmos-sdk => ../cosmos-sdk
+	// v0.45.0x-osmo-v7.10
+	github.com/cosmos/cosmos-sdk => github.com/osmosis-labs/cosmos-sdk v0.45.1-0.20220517190359-30ebc413ddff
 	github.com/cosmos/iavl => github.com/osmosis-labs/iavl v0.17.3-osmo-v7
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alpha.regen.4
 	github.com/tendermint/tm-db => github.com/osmosis-labs/tm-db v0.6.5-0.20210911033928-ba9154613417
