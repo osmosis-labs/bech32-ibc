@@ -1,0 +1,11 @@
+{
+    "address": "CDAD1596B23089B60D16030902B17DA8FF5DFB2F",
+    "pub_key": {
+      "type": "tendermint/PubKeyEd25519",
+      "value": "XpeQ0s79eZlUQ8ApowdFKgB8mmrVnDqGqmgtqZz+l3U="
+    },
+    "priv_key": {
+      "type": "tendermint/PrivKeyEd25519",
+      "value": "vvYS/DLGB877g5o53boytMZzhQj0lCvseu6Q3tCDbAVel5DSzv15mVRDwCmjB0UqAHyaatWcOoaqaC2pnP6XdQ=="
+    }
+  }
