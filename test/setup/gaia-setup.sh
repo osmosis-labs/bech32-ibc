@@ -39,4 +39,3 @@ sed -i 's/index_all_keys = false/index_all_keys = true/g' ~/.gaia/config/config.
 
 # Start the gaia
 gaiad start --pruning=nothing
-

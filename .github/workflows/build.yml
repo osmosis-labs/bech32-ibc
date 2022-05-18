@@ -21,7 +21,7 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@v1
         with:
-          go-version: 1.17
+          go-version: 1.15
         env:
           GOOS: ${{ matrix.targetos }}
           GOARCH: ${{ matrix.arch }}
@@ -31,9 +31,7 @@ jobs:
           go mod download
           cd cmd/bech32ibcd
           go build .
-
       - uses: actions/upload-artifact@v2
         with:
           name: bech32ibcd ${{ matrix.targetos }} ${{ matrix.arch }}
           path: cmd/bech32ibcd/bech32ibcd
-
