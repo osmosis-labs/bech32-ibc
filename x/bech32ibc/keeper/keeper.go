@@ -14,7 +14,7 @@ type (
 	Keeper struct {
 		channelKeeper types.ChannelKeeper
 
-		cdc      codec.Marshaler
+		cdc      codec.Codec
 		storeKey sdk.StoreKey
 
 		tk types.TransferKeeper
@@ -23,7 +23,7 @@ type (
 
 func NewKeeper(
 	channelKeeper types.ChannelKeeper,
-	cdc codec.Marshaler,
+	cdc codec.Codec,
 	storeKey sdk.StoreKey,
 	tk types.TransferKeeper,
 ) *Keeper {

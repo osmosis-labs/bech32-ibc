@@ -39,4 +39,3 @@ sed -i 's/index_all_keys = false/index_all_keys = true/g' ~/.akash/config/config
 
 # Start the akash
 akash start --pruning=nothing
-

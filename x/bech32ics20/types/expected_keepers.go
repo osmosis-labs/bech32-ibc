@@ -4,9 +4,9 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	transfertypes "github.com/cosmos/cosmos-sdk/x/ibc/applications/transfer/types"
-	channeltypes "github.com/cosmos/cosmos-sdk/x/ibc/core/04-channel/types"
-	"github.com/cosmos/cosmos-sdk/x/ibc/core/exported"
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
+	channeltypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
+	"github.com/cosmos/ibc-go/v3/modules/core/exported"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 )
 

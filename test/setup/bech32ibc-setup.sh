@@ -47,4 +47,3 @@ sed -i 's/index_all_keys = false/index_all_keys = true/g' ~/.bech32ibc/config/co
 
 # Start the bech32ibcd
 bech32ibcd start --pruning=nothing
-

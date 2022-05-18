@@ -2,13 +2,19 @@ package test
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 	"testing"
 	"time"
 
+	"github.com/cosmos/relayer/v2/relayer"
+	"github.com/cosmos/relayer/v2/relayer/provider"
+	"github.com/cosmos/relayer/v2/relayer/provider/cosmos"
+	dc "github.com/ory/dockertest/v3/docker"
+	"go.uber.org/zap/zaptest"
+
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/stretchr/testify/require"
-
-	ry "github.com/cosmos/relayer/relayer"
 )
 
 const (
@@ -21,38 +27,67 @@ const (
 )
 
 var (
-	// GAIA BLOCK TIMEOUTS are located in the gaia setup script in the
-	// setup directory.
-	// timeout_commit = "1000ms"
-	// timeout_propose = "1000ms"
-	// 3 second relayer timeout works well with these block times
+	gaiaProviderCfg = cosmos.CosmosProviderConfig{
+		Key:            "",
+		ChainID:        "",
+		RPCAddr:        "",
+		AccountPrefix:  "cosmos",
+		KeyringBackend: "test",
+		GasAdjustment:  1.3,
+		GasPrices:      "0.00samoleans",
+		Debug:          true,
+		Timeout:        "10s",
+		OutputFormat:   "json",
+		SignModeStr:    "direct",
+	}
 	gaiaTestConfig = testChainConfig{
-		dockerfile:     "./setup/Dockerfile.gaiatest",
-		timeout:        3 * time.Second,
-		rpcPort:        "26657",
-		accountPrefix:  "cosmos",
-		trustingPeriod: "330h",
+		dockerfile: "docker/gaiad/Dockerfile",
+		rpcPort:    "26657",
+		buildArgs: []dc.BuildArg{
+			{Name: "DefaultVersion", Value: "v5.0.8"},
+		},
 	}
 
-	// AKASH BLOCK TIMEOUTS on jackzampolin/akashtest:master
-	// timeout_commit = "1000ms"
-	// timeout_propose = "1000ms"
-	// 3 second relayer timeout works well with these block times
-	// This is built from contrib/Dockerfile.test from the akash repository:
+	akashProviderCfg = cosmos.CosmosProviderConfig{
+		Key:            "",
+		ChainID:        "",
+		RPCAddr:        "",
+		AccountPrefix:  "akash",
+		KeyringBackend: "test",
+		GasAdjustment:  1.3,
+		GasPrices:      "0.00samoleans",
+		Debug:          true,
+		Timeout:        "10s",
+		OutputFormat:   "json",
+		SignModeStr:    "direct",
+	}
 	akashTestConfig = testChainConfig{
-		dockerfile:     "./setup/Dockerfile.akashtest",
-		timeout:        3 * time.Second,
-		rpcPort:        "26657",
-		accountPrefix:  "akash",
-		trustingPeriod: "330h",
+		dockerfile: "docker/akash/Dockerfile",
+		rpcPort:    "26657",
+		buildArgs: []dc.BuildArg{
+			{Name: "DefaultVersion", Value: "v0.12.1"},
+		},
 	}
 
-	bech32ibcTestConfig = testChainConfig{
-		dockerfile:     "./setup/Dockerfile.bech32ibctest",
-		timeout:        3 * time.Second,
-		rpcPort:        "26657",
-		accountPrefix:  "osmo",
-		trustingPeriod: "330h",
+	osmosisProviderCfg = cosmos.CosmosProviderConfig{
+		Key:            "",
+		ChainID:        "",
+		RPCAddr:        "",
+		AccountPrefix:  "osmo",
+		KeyringBackend: "test",
+		GasAdjustment:  1.3,
+		GasPrices:      "0.00samoleans",
+		Debug:          true,
+		Timeout:        "10s",
+		OutputFormat:   "json",
+		SignModeStr:    "direct",
+	}
+	osmosisTestConfig = testChainConfig{
+		dockerfile: "docker/osmosis/Dockerfile",
+		rpcPort:    "26657",
+		buildArgs: []dc.BuildArg{
+			{Name: "DefaultVersion", Value: "v6.4.0"},
+		},
 	}
 
 	seeds = []string{SEED1, SEED2}
@@ -65,6 +100,7 @@ type (
 		chainID string
 		seed    int
 		t       testChainConfig
+		pcfg    provider.ProviderConfig
 	}
 
 	// testChainConfig represents the chain specific docker and codec configurations
@@ -75,19 +111,43 @@ type (
 		timeout        time.Duration
 		accountPrefix  string
 		trustingPeriod string
+		buildArgs      []dc.BuildArg
 	}
 )
 
 // newTestChain generates a new instance of *Chain with a free TCP port configured as the RPC port
-func newTestChain(t *testing.T, tc testChain) *ry.Chain {
+func newTestChain(t *testing.T, tc testChain) *relayer.Chain {
 	_, port, err := server.FreeTCPAddr()
 	require.NoError(t, err)
-	return &ry.Chain{
-		Key:            "testkey",
-		ChainID:        tc.chainID,
-		RPCAddr:        fmt.Sprintf("http://localhost:%s", port),
-		AccountPrefix:  tc.t.accountPrefix,
-		GasAdjustment:  1.3,
-		TrustingPeriod: tc.t.trustingPeriod,
+
+	switch tc.pcfg.(type) {
+	case cosmos.CosmosProviderConfig:
+		cosmosCfg, _ := tc.pcfg.(cosmos.CosmosProviderConfig)
+
+		cosmosCfg.Key = "testkey-" + port
+		cosmosCfg.RPCAddr = fmt.Sprintf("http://localhost:%s", port)
+		cosmosCfg.ChainID = tc.chainID
+
+		tc.pcfg = cosmosCfg
+		// TODO add case for substrate provider configType here
+	default:
+		panic(fmt.Errorf("no case for type %T when trying to edit ProviderConfig", tc.pcfg))
 	}
+
+	prov, err := tc.pcfg.NewProvider(zaptest.NewLogger(t), "/tmp", true)
+	require.NoError(t, err)
+
+	var debug bool
+	// add extra logging if TEST_DEBUG=true
+	if val, ok := os.LookupEnv("TEST_DEBUG"); ok {
+		debug, err = strconv.ParseBool(val)
+		if err != nil {
+			debug = false
+		}
+	}
+
+	c := relayer.NewChain(zaptest.NewLogger(t), prov, debug)
+	c.Chainid = tc.chainID
+	c.RPCAddr = fmt.Sprintf("http://localhost:%s", port)
+	return c
 }
