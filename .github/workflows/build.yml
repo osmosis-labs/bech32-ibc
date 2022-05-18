@@ -1,50 +1,37 @@
+# This is a basic workflow that is manually triggered
 
-name: BUILD - build and binary upload
+name: bech32ibc
 
-on:
-  pull_request:
-  push:
-    branches:
-      - master
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on: [push, pull_request]
+
+# This workflow makes x86_64 binaries for mac, windows, and linux.
 
 jobs:
   build:
-    name: build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+        targetos: [windows, darwin, linux]
+    name: bech32ibc ${{ matrix.arch }} for ${{ matrix.targetos }}
     steps:
-      # Install and setup go
-      - name: Set up Go 1.18
-        uses: actions/setup-go@v2
+      - uses: actions/checkout@v2
+      - name: Setup go
+        uses: actions/setup-go@v1
         with:
-          go-version: 1.18
+          go-version: 1.15
+        env:
+          GOOS: ${{ matrix.targetos }}
+          GOARCH: ${{ matrix.arch }}
 
-      # setup gopath
-      - name: Set PATH
+      - name: Compile
         run: |
-          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-        shell: bash
-
-      # checkout relayer
-      - name: checkout relayer
-        uses: actions/checkout@v2
-
-      # setup cache
-      - uses: actions/cache@v1
+          go mod download
+          cd cmd/bech32ibcd
+          go build .
+      - uses: actions/upload-artifact@v2
         with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-      # unit tests
-      - name: run unit tests
-        run: make test
-      # build binary
-      - name: build binary and move to upload location
-        run: make build
-
-      # upload resulting binaries
-      - name: upload binaries
-        uses: actions/upload-artifact@v1
-        with:
-          name: rly
-          path: ./build/rly
+          name: bech32ibcd ${{ matrix.targetos }} ${{ matrix.arch }}
+          path: cmd/bech32ibcd/bech32ibcd
