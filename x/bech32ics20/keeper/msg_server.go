@@ -57,7 +57,7 @@ func (k msgServer) Send(goCtx context.Context, msg *banktypes.MsgSend) (*banktyp
 	}
 
 	if msg.Amount.Len() == 0 {
-		return nil, sdkerrors.Wrap(banktypes.ErrNoInputs, "invalid send amount")
+		return nil, sdkerrors.Wrap(ibctransfertypes.ErrInvalidAmount, "invalid send amount")
 	}
 	if msg.Amount.Len() > 1 {
 		return nil, sdkerrors.Wrap(ibctransfertypes.ErrInvalidAmount, "cannot send multiple denoms via IBC")
@@ -84,8 +84,4 @@ func (k msgServer) Send(goCtx context.Context, msg *banktypes.MsgSend) (*banktyp
 	_, err = k.ics20TransferMsgServer.Transfer(sdk.WrapSDKContext(ctx), ibcTransferMsg)
 
 	return &banktypes.MsgSendResponse{}, err
-}
-func (k msgServer) MultiSend(goCtx context.Context, msg *banktypes.MsgMultiSend) (*banktypes.MsgMultiSendResponse, error) {
-	bankMsgServer := bankkeeper.NewMsgServerImpl(k.Keeper.Keeper)
-	return bankMsgServer.MultiSend(goCtx, msg)
 }

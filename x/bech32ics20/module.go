@@ -36,7 +36,10 @@ type AppModule struct {
 // BE WARNED: THIS NEEDS TO BE UPDATED EVERY BANK UPDATE
 func (am AppModule) RegisterServices(cfg module.Configurator) {
 	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
-	types.RegisterQueryServer(cfg.QueryServer(), am.keeper)
+
+	baseKeeper := am.keeper.Keeper.(bankkeeper.BaseKeeper)
+	querier := bankkeeper.Querier{BaseKeeper: baseKeeper}
+	types.RegisterQueryServer(cfg.QueryServer(), querier)
 
 	var m bankkeeper.Migrator
 	if bankPtr, ok := am.keeper.Keeper.(*bankkeeper.BaseKeeper); ok {
